@@ -10,38 +10,45 @@ def get_args():
     p = argparse.ArgumentParser(prog='ptt-statistics')
 
     p.add_argument('board')
-    p.add_argument('--from-year', nargs='?')
-    p.add_argument('--to-year', nargs='?')
+    p.add_argument('--from-year', nargs='?', type=int,
+                   default=datetime.date.today().year,
+                   description="(default: current year)")
+    p.add_argument('--to-year', nargs='?', type=int,
+                   default=datetime.date.today().year,
+                   description="(default: current year)")
 
     args = p.parse_args()
 
-    if args.from_year:      # from xxxx/01/01 00:00:00
-        args.from_year = datetime.datetime(args.from_year, 1, 1,
-                                           0, 0, 0)
-    else:
-        args.from_year = datetime.datetime(datetime.date.today().year, 1, 1,
-                                           0, 0, 0)
-
-    if args.to_year:      # to xxxx/12/31 23:59:59
-        args.to_year = datetime.datetime(args.to_year, 12, 31,
-                                         23, 59, 59)
-    else:
-        args.to_year = datetime.datetime(datetime.date.today().year, 12, 31,
-                                         23, 59, 59)
+    # from xxxx/01/01 00:00:00
+    args.from_year = datetime.datetime(args.from_year, 1, 1, 0, 0, 0)
+    # to xxxx/12/31 23:59:59
+    args.to_year = datetime.datetime(args.to_year, 12, 31, 23, 59, 59)
 
     return args
 
 
 def main():
     args = get_args()
-    board = ptt_crawler.Board(args.board, verify=False)
-    print(board)
+    board = ptt_crawler.Board(args.board, verify=True)
 
-    for i, article in enumerate(board.articles()):
-        print(article.content)
-
-        for comment in article.comments:
-            print(comment)
+    print(board.cookies['over18'])
+    print(board.name)
+    while True:
+        try:
+            article = board.articles().__next__()
+        except:
+            continue
+        else:
+            print(article.id)
+            # print(article.url)
+            # print(article.author)
+            # print(article.reply)
+            # print(article.type)
+            # print(article.title)
+            # print(article.time)
+            # print(article.content)
+            # print(article.comments)
+            break
 
         time.sleep(1)
 
