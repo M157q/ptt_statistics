@@ -46,12 +46,11 @@ def main():
             continue
 
         pprint(vars(article))
-        if article.author:
-            controllers.db_article(article, board)
+        controllers.db_article(article, board)
 
-            for comment in article.comments:
-                pprint(comment.items())
-                controllers.db_comment(comment, article, board)
+        for comment in article.comments:
+            pprint(comment.items())
+            controllers.db_comment(comment, article, board)
 
 
 if __name__ == "__main__":

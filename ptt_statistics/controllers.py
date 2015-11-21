@@ -23,7 +23,9 @@ def db_article(article, board):
                                         board=board_entity)
 
     if article_entity is None:
-        user_id = article.author.split()[0]
+        user_id = (article.author.split()[0]
+                   if isinstance(article.author, str)
+                   else '')
         user_entity = models.User.get(identifier=user_id)
         if user_entity is None:
             user_entity = models.User(identifier=user_id)
@@ -87,11 +89,12 @@ def db_comment(comment, article, board):
         date_time = datetime.strptime("{}/{}".format(article_year,
                                                      comment['time']),
                                       "%Y/%m/%d %H:%M")
-    if (
-        article_entity.datetime and
-        date_time.month < article_entity.datetime.month
-    ):
-        date_time = datetime.strptime("{}/{}".format(article_year+1,
+        if date_time.month < article_entity.datetime.month:
+            date_time = datetime.strptime("{}/{}".format(article_year+1,
+                                                         comment['time']),
+                                          "%Y/%m/%d %H:%M")
+    else:
+        date_time = datetime.strptime("{}/{}".format(9999,
                                                      comment['time']),
                                       "%Y/%m/%d %H:%M")
 

@@ -14,7 +14,7 @@ class Board(db.Entity):
 
 
 class User(db.Entity):
-    identifier = orm.Required(str, unique=True)
+    identifier = orm.Optional(str, unique=True)
     articles = orm.Set("Article")
     comments = orm.Set("Comment")
     article_types = orm.Set("ArticleType")
