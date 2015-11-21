@@ -1,7 +1,7 @@
 import argparse
 import datetime
 import sys
-import time
+from pprint import pprint
 
 import ptt_crawler
 
@@ -38,25 +38,20 @@ def main():
 
     controllers.db_board(board)
 
+    articles = board.articles()
     while True:
         try:
-            article = board.articles().__next__()
+            article = articles.__next__()
         except:
             continue
 
-        # controllers.db_article(article, board)
-        # print(article.id)
-        # print(article.url)
-        # print(article.author)
-        # print(article.reply)
-        # print(article.type)
-        # print(article.title)
-        print(article.time)
-        # print(article.content)
-        print((article.comments[0]))
-        break
+        pprint(vars(article))
+        if article.author:
+            controllers.db_article(article, board)
 
-        time.sleep(1)
+            for comment in article.comments:
+                pprint(comment.items())
+                controllers.db_comment(comment, article, board)
 
 
 if __name__ == "__main__":

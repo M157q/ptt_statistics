@@ -12,33 +12,93 @@ def db_board(board):
     if board_entity is None:
         board_entity = models.Board(name=board.name,
                                     over18=bool(board.cookies['over18']))
-    models.Board.select().show()
+
+    # orm.show(board_entity)
 
 
 @orm.db_session
 def db_article(article, board):
-    article_entity = models.Article.get(identifier=article.id)
     board_entity = models.Board.get(name=board.name)
+    article_entity = models.Article.get(identifier=article.id,
+                                        board=board_entity)
 
     if article_entity is None:
-        author_id = article.author.split()[0]
-        author = models.Person.get(identifier=author_id)
-        if author is None:
-            author = models.Person(identifier=author_id)
+        user_id = article.author.split()[0]
+        user_entity = models.User.get(identifier=user_id)
+        if user_entity is None:
+            user_entity = models.User(identifier=user_id)
 
-        time = datetime.strptime(article.time, "%Y-%m-%d %H:%M:%S")
+        article_type = (article.type.strip()
+                        if isinstance(article.type, str)
+                        else '')
+        article_type_entity = models.ArticleType.get(name=article_type,
+                                                     board=board_entity)
+        if article_type_entity is None:
+            article_type_entity = models.ArticleType(name=article_type,
+                                                     board=board_entity)
+
+        article_title = (article.title.strip()
+                         if isinstance(article.title, str)
+                         else '')
+        article_title_entity = models.ArticleTitle.get(name=article_title,
+                                                       board=board_entity)
+        if article_title_entity is None:
+            article_title_entity = models.ArticleTitle(name=article_title,
+                                                       board=board_entity)
 
         article_entity = models.Article(identifier=article.id,
                                         url=article.url,
-                                        author=author,
+                                        user=user_entity,
                                         reply=bool(article.reply),
-                                        type=article.type.strip(),
-                                        title=article.title,
-                                        time=time,
+                                        type=article_type_entity,
+                                        title=article_title_entity,
+                                        datetime=article.time,
                                         content=article.content,
-                                        in_which_board=board_entity)
-    elif article_entity.comments.count() > article.comments.count():
-            # TODO: Add new comments
-            pass
+                                        board=board_entity)
+    # elif article_entity.comments.count() > article.comments.count():
+    # TODO: Add new comments
 
-    models.Article.select().show()
+    # orm.show(article_entity)
+
+
+@orm.db_session
+def db_comment(comment, article, board):
+    '''user, content, tag, time'''
+    board_entity = models.Board.get(name=board.name)
+
+    tag_entity = models.CommentTag.get(name=comment['tag'])
+    if tag_entity is None:
+        tag_entity = models.CommentTag(name=comment['tag'])
+
+    user_entity = models.User.get(identifier=comment['user'])
+    if user_entity is None:
+        user_entity = models.User(identifier=comment['user'])
+
+    comment_content_entity = models.CommentContent.get(s=comment['content'])
+    if comment_content_entity is None:
+        comment_content_entity = models.CommentContent(s=comment['content'])
+
+    article_entity = models.Article.get(identifier=article.id,
+                                        board=board_entity)
+
+    # TODO: different board may have different time format for comments
+    if isinstance(article_entity.datetime, datetime):
+        article_year = article_entity.datetime.year
+        date_time = datetime.strptime("{}/{}".format(article_year,
+                                                     comment['time']),
+                                      "%Y/%m/%d %H:%M")
+    if (
+        article_entity.datetime and
+        date_time.month < article_entity.datetime.month
+    ):
+        date_time = datetime.strptime("{}/{}".format(article_year+1,
+                                                     comment['time']),
+                                      "%Y/%m/%d %H:%M")
+
+    comment_entity = models.Comment(tag=tag_entity,
+                                    user=user_entity,
+                                    content=comment_content_entity,
+                                    datetime=date_time,
+                                    article=article_entity)
+
+    orm.show(comment_entity)
