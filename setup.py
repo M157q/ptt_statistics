@@ -3,7 +3,8 @@
 from setuptools import find_packages, setup
 
 requires = [
-    'ptt-crawler'
+    'ptt-crawler',
+    'pony',
 ]
 
 setup(
