@@ -30,7 +30,7 @@ class Article(db.Entity):
     title = orm.Required("ArticleTitle")
     date = orm.Optional(datetime.date, nullable=True)
     time = orm.Optional(datetime.time, nullable=True)
-    content = orm.Required(orm.LongStr)
+    content = orm.Optional(orm.LongStr, nullable=True)
     comments = orm.Set("Comment")
     board = orm.Required(Board)
 
