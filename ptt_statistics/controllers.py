@@ -1,4 +1,5 @@
-from datetime import datetime
+import re
+import datetime
 
 from pony import orm
 
@@ -48,13 +49,21 @@ def db_article(article, board):
             article_title_entity = models.ArticleTitle(name=article_title,
                                                        board=board_entity)
 
+        try:
+            article_date = article.time.date()
+            article_time = article.time.time()
+        except AttributeError:
+            article_date = None
+            article_time = None
+
         article_entity = models.Article(identifier=article.id,
                                         url=article.url,
                                         user=user_entity,
                                         reply=bool(article.reply),
                                         type=article_type_entity,
                                         title=article_title_entity,
-                                        datetime=article.time,
+                                        date=article_date,
+                                        time=article_time,
                                         content=article.content,
                                         board=board_entity)
     # elif article_entity.comments.count() > article.comments.count():
@@ -83,25 +92,25 @@ def db_comment(comment, article, board):
     article_entity = models.Article.get(identifier=article.id,
                                         board=board_entity)
 
-    # TODO: different board may have different time format for comments
-    if isinstance(article_entity.datetime, datetime):
-        article_year = article_entity.datetime.year
-        date_time = datetime.strptime("{}/{}".format(article_year,
-                                                     comment['time']),
-                                      "%Y/%m/%d %H:%M")
-        if date_time.month < article_entity.datetime.month:
-            date_time = datetime.strptime("{}/{}".format(article_year+1,
-                                                         comment['time']),
-                                          "%Y/%m/%d %H:%M")
-    else:
-        date_time = datetime.strptime("{}/{}".format(9999,
-                                                     comment['time']),
-                                      "%Y/%m/%d %H:%M")
+    try:
+        article_year = article_entity.date.year
+    except AttributeError:
+        article_year = datetime.MAXYEAR
+
+    m = re.match(r"(\d+/\d+)?\s*(\d+:\d+)?", comment['time'])
+    comment_date, comment_time = m.groups()
+    if comment_date:
+        comment_month, comment_day = map(int, comment_date.split('/'))
+        comment_date = datetime.date(article_year, comment_month, comment_day)
+    if comment_time:
+        comment_hour, comment_min = map(int, comment_time.split(':'))
+        comment_time = datetime.time(comment_hour, comment_min)
 
     comment_entity = models.Comment(tag=tag_entity,
                                     user=user_entity,
                                     content=comment_content_entity,
-                                    datetime=date_time,
+                                    date=comment_date,
+                                    time=comment_time,
                                     article=article_entity)
 
     orm.show(comment_entity)

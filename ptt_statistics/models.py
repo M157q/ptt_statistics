@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from pony import orm
 
@@ -28,7 +28,8 @@ class Article(db.Entity):
     reply = orm.Required(bool)
     type = orm.Required("ArticleType")
     title = orm.Required("ArticleTitle")
-    datetime = orm.Optional(datetime, nullable=True)
+    date = orm.Optional(datetime.date, nullable=True)
+    time = orm.Optional(datetime.time, nullable=True)
     content = orm.Required(orm.LongStr)
     comments = orm.Set("Comment")
     board = orm.Required(Board)
@@ -55,10 +56,11 @@ class Comment(db.Entity):
     tag = orm.Required("CommentTag")
     user = orm.Required(User)
     content = orm.Required("CommentContent")
-    datetime = orm.Optional(datetime, nullable=True)
+    date = orm.Optional(datetime.date, nullable=True)
+    time = orm.Optional(datetime.time, nullable=True)
     article = orm.Required(Article)
 
-    # orm.composite_index(tag, user, content, datetime, article)
+    # orm.composite_index(tag, user, content, date, time, article)
 
 
 class CommentTag(db.Entity):
