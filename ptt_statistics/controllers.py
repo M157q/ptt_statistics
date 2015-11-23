@@ -100,10 +100,18 @@ def db_comment(comment, article, board):
     comment_date, comment_time = m.groups()
     if comment_date:
         comment_month, comment_day = map(int, comment_date.split('/'))
-        comment_date = datetime.date(article_year, comment_month, comment_day)
+        try:
+            comment_date = datetime.date(article_year,
+                                         comment_month,
+                                         comment_day)
+        except ValueError:
+            comment_date = None
     if comment_time:
         comment_hour, comment_min = map(int, comment_time.split(':'))
-        comment_time = datetime.time(comment_hour, comment_min)
+        try:
+            comment_time = datetime.time(comment_hour, comment_min)
+        except ValueError:
+            comment_time = None
 
     comment_entity = models.Comment(tag=tag_entity,
                                     user=user_entity,
