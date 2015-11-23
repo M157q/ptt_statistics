@@ -42,7 +42,7 @@ def main():
         articles = board.articles()
 
         try:
-            article = articles.__next__()
+            article = articles.next()
         except:
             return
         else:
@@ -68,7 +68,7 @@ def main():
                     break
                 except:
                     traceback.print_exc()
-                    break
+                    continue
 
     if hasattr(args, 'article_path'):
         board = ptt_crawler.Board()
