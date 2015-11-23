@@ -1,5 +1,6 @@
 import re
 import datetime
+from pprint import pprint
 
 from pony import orm
 
@@ -64,11 +65,12 @@ def db_article(article, board):
                                         date=article_date,
                                         time=article_time,
                                         content=article.content,
-                                        board=board_entity)
-    # elif article_entity.comments.count() > article.comments.count():
-    # TODO: Add new comments
-
-    # orm.show(article_entity)
+                                        board=board_entity,
+                                        update_time=datetime.datetime.now())
+        pprint(vars(article))
+        orm.show(article_entity)
+    else:
+        article_entity.update_time = datetime.datetime.now()
 
 
 @orm.db_session
@@ -113,11 +115,31 @@ def db_comment(comment, article, board):
         except ValueError:
             comment_time = None
 
-    comment_entity = models.Comment(tag=tag_entity,
-                                    user=user_entity,
-                                    content=comment_content_entity,
-                                    date=comment_date,
-                                    time=comment_time,
-                                    article=article_entity)
+    try:
+        comment_entity = models.Comment.get(tag=tag_entity,
+                                            user=user_entity,
+                                            content=comment_content_entity,
+                                            date=comment_date,
+                                            time=comment_time,
+                                            article=article_entity)
+    except:
+        import traceback
+        traceback.print_exc()
+        orm.show(tag_entity)
+        orm.show(user_entity)
+        orm.show(comment_content_entity)
+        print(comment_date)
+        print(comment_time)
+        orm.show(article_entity)
+        print(article_entity.url)
 
-    orm.show(comment_entity)
+    if comment_entity is None:
+        comment_entity = models.Comment(tag=tag_entity,
+                                        user=user_entity,
+                                        content=comment_content_entity,
+                                        date=comment_date,
+                                        time=comment_time,
+                                        article=article_entity)
+
+        pprint(comment.items())
+        orm.show(comment_entity)

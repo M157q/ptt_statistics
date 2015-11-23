@@ -32,6 +32,7 @@ class Article(db.Entity):
     content = orm.Optional(orm.LongStr, nullable=True)
     comments = orm.Set("Comment")
     board = orm.Required(Board)
+    update_time = orm.Required(datetime.datetime)
 
     orm.composite_index(identifier, board)
     orm.composite_index(type, title, board)
@@ -59,7 +60,7 @@ class Comment(db.Entity):
     time = orm.Optional(datetime.time, nullable=True)
     article = orm.Required(Article)
 
-    # orm.composite_index(tag, user, content, date, time, article)
+    orm.composite_index(tag, user, content, date, time, article)
 
 
 class CommentTag(db.Entity):

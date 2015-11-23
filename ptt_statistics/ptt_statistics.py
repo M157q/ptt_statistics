@@ -1,7 +1,7 @@
 import argparse
 import datetime
 import sys
-from pprint import pprint
+import traceback
 
 import ptt_crawler
 
@@ -51,16 +51,18 @@ def main():
             controllers.db_board(board)
 
             while True:
-                pprint(vars(article))
                 controllers.db_article(article, board)
 
                 for comment in article.comments:
-                    pprint(comment.items())
                     controllers.db_comment(comment, article, board)
 
                 try:
-                    article = articles.__next__()
+                    article = articles.next()
+                except StopIteration:
+                    print("No next article.")
+                    break
                 except:
+                    traceback.print_exc()
                     break
 
     if hasattr(args, 'article_path'):
