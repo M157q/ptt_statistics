@@ -6,7 +6,8 @@ Get the statistics of a board on PTT.
   
 ## Installation  
   
-`$ pip install git+https://github.com/M157q/ptt_statistics`  
+`$ pip3 install git+https://github.com/M157q/ptt-crawler`  
+`$ pip3 install git+https://github.com/M157q/ptt_statistics`  
   
 ---  
   

@@ -3,11 +3,26 @@
 from setuptools import find_packages, setup
 
 
+try:
+    import ptt_crawler
+except ImportError:
+    errmsg = [
+        "Cannot find module 'ptt_crawler'",
+        "Use the following command to install",
+        "`pip3 install git+https://github.com/M157q/ptt-crawler`",
+    ]
+    l = max(map(len, errmsg))
+    print('')
+    print('='*l)
+    print('\n'.join(errmsg))
+    print('='*l)
+    print('')
+    raise
+
 setup(
     packages=find_packages(exclude=['ptt_statistics.bin']),
     scripts=['ptt_statistics/bin/ptt_statistics'],
     install_requires=['pony'],
-    dependency_links=["https://github.com/M157q/ptt-crawler/tarball/master"],
     name='ptt_statistics',
     version='0.0.1',
     author='Shun-Yi Jheng',
