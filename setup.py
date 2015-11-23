@@ -2,15 +2,12 @@
 
 from setuptools import find_packages, setup
 
-requires = [
-    'ptt-crawler',
-    'pony',
-]
 
 setup(
     packages=find_packages(exclude=['ptt_statistics.bin']),
     scripts=['ptt_statistics/bin/ptt_statistics'],
-    install_requires=requires,
+    install_requires=['pony'],
+    dependency_links=["https://github.com/M157q/ptt-crawler/tarball/master"],
     name='ptt_statistics',
     version='0.0.1',
     author='Shun-Yi Jheng',
