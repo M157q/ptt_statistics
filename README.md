@@ -29,3 +29,9 @@ subcommands:
 ## Reference  
   
 + <https://www.ptt.cc/bbs/sex/M.1447949531.A.610.html>  
+  
+---  
+  
+## LICENSE  
+  
+GPLv3  
