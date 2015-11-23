@@ -57,14 +57,15 @@ def main():
                 for comment in article.comments:
                     controllers.db_comment(comment, article, board)
 
-                last_article = article
                 try:
                     article = articles.next()
                 except StopIteration:
                     print("No next article.")
                     break
                 except requests.exceptions.ConnectionError:
-                    article = last_article
+                    traceback.print_exc()
+                    print("ConnectionError happened.")
+                    break
                 except:
                     traceback.print_exc()
                     break
