@@ -11,46 +11,68 @@ from . import controllers
 
 def get_args():
     p = argparse.ArgumentParser(prog='ptt-statistics')
+    sub_p = p.add_subparsers(title='subcommands',
+                             help="use ${sub-command} -h for further usage")
 
-    p.add_argument('board')
-    p.add_argument('--from-year', nargs='?', type=int,
-                   default=datetime.date.today().year,
-                   help="(default: current year)")
-    p.add_argument('--to-year', nargs='?', type=int,
-                   default=datetime.date.today().year,
-                   help="(default: current year)")
+    p_board = sub_p.add_parser('board',
+                               help="Craw the specific board")
+    p_board.add_argument('board_name', help="The name of the board")
+    p_board.add_argument('--from-year', nargs='?', type=int,
+                         default=datetime.MINYEAR,
+                         help="default: {}".format(datetime.MINYEAR))
+    p_board.add_argument('--to-year', nargs='?', type=int,
+                         default=datetime.date.today().year,
+                         help="default: {}".format(datetime.date.today().year))
+
+    p_path = sub_p.add_parser('path',
+                              help="Get specific article info with path")
+    p_path.add_argument('article_path',
+                        help="The path of the article on www.ptt.cc")
 
     args = p.parse_args()
-
-    # from xxxx/01/01 00:00:00
-    args.from_year = datetime.datetime(args.from_year, 1, 1, 0, 0, 0)
-    # to xxxx/12/31 23:59:59
-    args.to_year = datetime.datetime(args.to_year, 12, 31, 23, 59, 59)
-
     return args
 
 
 def main():
     args = get_args()
-    board = ptt_crawler.Board(args.board, verify=True)
-    models.db.bind('sqlite', '../ptt_statistics.db', create_db=True)
-    models.db.generate_mapping(create_tables=True, check_tables=True)
 
-    controllers.db_board(board)
+    if hasattr(args, 'board_name'):
+        board = ptt_crawler.Board(args.board_name, verify=True)
+        articles = board.articles()
 
-    articles = board.articles()
-    while True:
         try:
             article = articles.__next__()
         except:
-            continue
+            return
+        else:
+            models.db.bind('sqlite', '../ptt_statistics.db', create_db=True)
+            models.db.generate_mapping(create_tables=True, check_tables=True)
 
-        pprint(vars(article))
-        controllers.db_article(article, board)
+            controllers.db_board(board)
 
-        for comment in article.comments:
-            pprint(comment.items())
-            controllers.db_comment(comment, article, board)
+            while True:
+                pprint(vars(article))
+                controllers.db_article(article, board)
+
+                for comment in article.comments:
+                    pprint(comment.items())
+                    controllers.db_comment(comment, article, board)
+
+                try:
+                    article = articles.__next__()
+                except:
+                    break
+
+    if hasattr(args, 'article_path'):
+        board = ptt_crawler.Board()
+        try:
+            page = board.get_data(args.article_path)
+        except:
+            print("Unknown Page. Use this format: /bbs/${board}/${id}.html")
+        else:
+            # TODO: get the content of article and store it to db
+            print(board.get_url(args.article_path))
+            print(page, type(page))
 
 
 if __name__ == "__main__":

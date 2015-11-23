@@ -13,13 +13,15 @@ Get the statistics of a board on PTT.
 ## Usage  
   
 ```  
-usage: ptt-statistics [-h] board  
-  
-positional arguments:  
-  board  
+usage: ptt-statistics [-h] {board,path} ...  
   
 optional arguments:  
-  -h, --help  show this help message and exit  
+  -h, --help    show this help message and exit  
+  
+subcommands:  
+  {board,path}  use ${sub-command} -h for further usage  
+    board       Craw the specific board  
+    path        Get specific article info with path  
 ```  
   
 ---  

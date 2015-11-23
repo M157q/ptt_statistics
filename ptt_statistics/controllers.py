@@ -11,8 +11,7 @@ def db_board(board):
     board_entity = models.Board.get(name=board.name)
 
     if board_entity is None:
-        board_entity = models.Board(name=board.name,
-                                    over18=bool(board.cookies['over18']))
+        board_entity = models.Board(name=board.name)
 
     # orm.show(board_entity)
 

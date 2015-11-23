@@ -7,7 +7,6 @@ db = orm.Database()
 
 class Board(db.Entity):
     name = orm.Required(str, unique=True)
-    over18 = orm.Required(bool)
     articles = orm.Set("Article")
     article_types = orm.Set("ArticleType")
     article_titles = orm.Set("ArticleTitle")
