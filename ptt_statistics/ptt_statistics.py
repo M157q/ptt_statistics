@@ -35,52 +35,60 @@ def get_args():
     return args
 
 
+def store_board_info(board_name):
+    # TODO: from_year and to_year selection
+    board = ptt_crawler.Board(board_name, verify=True)
+    articles = board.articles()
+
+    try:
+        article = articles.next()
+    except:
+        return
+    else:
+        models.db.bind('sqlite', constants.db_path, create_db=True)
+        models.db.generate_mapping(create_tables=True, check_tables=True)
+
+        controllers.store_board(board)
+
+        while True:
+            controllers.store_article(article, board)
+
+            for comment in article.comments:
+                controllers.store_comment(comment, article, board)
+
+            try:
+                article = articles.next()
+            except StopIteration:
+                print("No next article.")
+                break
+            except requests.exceptions.ConnectionError:
+                traceback.print_exc()
+                print("ConnectionError happened.")
+                break
+            except:
+                traceback.print_exc()
+                continue
+
+
+def store_article_info(article_path):
+    board = ptt_crawler.Board()
+    try:
+        page = board.get_data(article_path)
+    except:
+        print("Unknown Page. Use this format: /bbs/${board}/${id}.html")
+    else:
+        # TODO: get the content of article and store it to db
+        print(board.get_url(article_path))
+        print(page, type(page))
+
+
 def main():
     args = get_args()
 
     if hasattr(args, 'board_name'):
-        board = ptt_crawler.Board(args.board_name, verify=True)
-        articles = board.articles()
-
-        try:
-            article = articles.next()
-        except:
-            return
-        else:
-            models.db.bind('sqlite', constants.db_path, create_db=True)
-            models.db.generate_mapping(create_tables=True, check_tables=True)
-
-            controllers.store_board(board)
-
-            while True:
-                controllers.store_article(article, board)
-
-                for comment in article.comments:
-                    controllers.store_comment(comment, article, board)
-
-                try:
-                    article = articles.next()
-                except StopIteration:
-                    print("No next article.")
-                    break
-                except requests.exceptions.ConnectionError:
-                    traceback.print_exc()
-                    print("ConnectionError happened.")
-                    break
-                except:
-                    traceback.print_exc()
-                    continue
-
+        store_board_info(args.board_name)
     if hasattr(args, 'article_path'):
-        board = ptt_crawler.Board()
-        try:
-            page = board.get_data(args.article_path)
-        except:
-            print("Unknown Page. Use this format: /bbs/${board}/${id}.html")
-        else:
-            # TODO: get the content of article and store it to db
-            print(board.get_url(args.article_path))
-            print(page, type(page))
+        store_article_info(args.article_path)
 
 
 if __name__ == "__main__":
