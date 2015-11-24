@@ -2,6 +2,7 @@
 
 from setuptools import find_packages, setup
 
+import ptt_statistics
 
 try:
     import ptt_crawler
@@ -19,12 +20,13 @@ except ImportError:
     print('')
     raise
 
+
 setup(
     packages=find_packages(exclude=['ptt_statistics.bin']),
     scripts=['ptt_statistics/bin/ptt_statistics'],
     install_requires=['pony'],
     name='ptt_statistics',
-    version='0.0.1',
+    version=ptt_statistics.__version__,
     author='Shun-Yi Jheng',
     author_email='M157q.tw@gmail.com',
     url="https://github.com/M157q/ptt-statistics",
