@@ -16,6 +16,7 @@ def get_args():
     sub_p = p.add_subparsers(title='subcommands',
                              help="use ${sub-command} -h for further usage")
 
+    # subcommand: board
     p_board = sub_p.add_parser('board',
                                help="Craw the specific board")
     p_board.add_argument('board_name', help="The name of the board")
@@ -26,10 +27,21 @@ def get_args():
                          default=datetime.date.today().year,
                          help="default: {}".format(datetime.date.today().year))
 
+    # subcommand: path
     p_path = sub_p.add_parser('path',
                               help="Get specific article info with path")
     p_path.add_argument('article_path',
-                        help="The path of the article on www.ptt.cc")
+                        help=("The path of the article on www.ptt.cc"
+                              "\n"
+                              "In this format: '/bbs/${board}/${id}.html' "))
+
+    # subcommand: show
+    p_show = sub_p.add_parser('show',
+                              help="Show info of the board via data in db")
+    p_show.add_argument('board_to_show',
+                        help="The name of the board for showing its info")
+    p_show.add_argument('show_type',
+                        help="The type for showing the board info")
 
     args = p.parse_args()
     return args
