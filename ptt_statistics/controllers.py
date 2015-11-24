@@ -52,7 +52,7 @@ def store_article(article, board):
         try:
             article_date = article.time.date()
             article_time = article.time.time()
-        except AttributeError:
+        except (AttributeError, ValueError):
             article_date = None
             article_time = None
 
