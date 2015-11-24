@@ -6,8 +6,9 @@ import traceback
 import ptt_crawler
 import requests
 
-from . import models
+from . import constants
 from . import controllers
+from . import models
 
 
 def get_args():
@@ -46,7 +47,7 @@ def main():
         except:
             return
         else:
-            models.db.bind('sqlite', '../ptt_statistics.db', create_db=True)
+            models.db.bind('sqlite', constants.db_path, create_db=True)
             models.db.generate_mapping(create_tables=True, check_tables=True)
 
             controllers.store_board(board)
