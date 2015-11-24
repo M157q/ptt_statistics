@@ -8,7 +8,7 @@ from . import models
 
 
 @orm.db_session
-def db_board(board):
+def store_board(board):
     board_entity = models.Board.get(name=board.name)
 
     if board_entity is None:
@@ -18,7 +18,7 @@ def db_board(board):
 
 
 @orm.db_session
-def db_article(article, board):
+def store_article(article, board):
     board_entity = models.Board.get(name=board.name)
     article_entity = models.Article.get(identifier=article.id,
                                         board=board_entity)
@@ -74,7 +74,7 @@ def db_article(article, board):
 
 
 @orm.db_session
-def db_comment(comment, article, board):
+def store_comment(comment, article, board):
     '''user, content, tag, time'''
     board_entity = models.Board.get(name=board.name)
 

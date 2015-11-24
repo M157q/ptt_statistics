@@ -49,13 +49,13 @@ def main():
             models.db.bind('sqlite', '../ptt_statistics.db', create_db=True)
             models.db.generate_mapping(create_tables=True, check_tables=True)
 
-            controllers.db_board(board)
+            controllers.store_board(board)
 
             while True:
-                controllers.db_article(article, board)
+                controllers.store_article(article, board)
 
                 for comment in article.comments:
-                    controllers.db_comment(comment, article, board)
+                    controllers.store_comment(comment, article, board)
 
                 try:
                     article = articles.next()
