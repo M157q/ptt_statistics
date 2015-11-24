@@ -103,6 +103,21 @@ def store_comment(comment, article, board):
     if comment_date:
         comment_month, comment_day = map(int, comment_date.split('/'))
 
+        '''
+        Treat the comment which comment_month < article_month
+        as commented at the next year of the year which article been posted.
+        '''
+        try:
+            article_month = article_entity.date.month
+        except AttributeError:
+            pass
+        else:
+            if (
+                comment_month < article_month and
+                comment_year != datetime.MAXYEAR
+            ):
+                comment_year += 1
+
         try:
             comment_date = datetime.date(comment_year,
                                          comment_month,
