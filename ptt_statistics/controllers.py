@@ -94,16 +94,17 @@ def store_comment(comment, article, board):
                                         board=board_entity)
 
     try:
-        article_year = article_entity.date.year
+        comment_year = article_entity.date.year
     except AttributeError:
-        article_year = datetime.MAXYEAR
+        comment_year = datetime.MAXYEAR
 
     m = re.match(r"(\d+/\d+)?\s*(\d+:\d+)?", comment['time'])
     comment_date, comment_time = m.groups()
     if comment_date:
         comment_month, comment_day = map(int, comment_date.split('/'))
+
         try:
-            comment_date = datetime.date(article_year,
+            comment_date = datetime.date(comment_year,
                                          comment_month,
                                          comment_day)
         except ValueError:
