@@ -158,3 +158,15 @@ def store_comment(comment, article, board):
 
         pprint(comment.items())
         orm.show(comment_entity)
+
+
+def get_specific_day_info(board_name, **kargs):
+    pass
+
+
+def get_specific_month_info(board_name, **kargs):
+    pass
+
+
+def get_specific_year_info(board_name, **kargs):
+    pass

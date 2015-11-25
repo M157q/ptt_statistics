@@ -10,6 +10,7 @@ from . import constants
 from . import controllers
 from . import models
 from . import utils
+from . import views
 
 
 def get_args():
@@ -104,6 +105,30 @@ def store_article_info(article_path):
         print(page, type(page))
 
 
+def show_board_info(board_name, date_tuple):
+    try:
+        year, month, day = utils.check_date_tuple(date_tuple)
+    except ValueError:
+        traceback.print_exc()
+        exit()
+
+    if year and month and day:
+        data = controllers.get_specific_day_info(board_name,
+                                                 year=year,
+                                                 month=month,
+                                                 day=day)
+        views.show_specific_day_info(data)
+    elif year and month:
+        data = controllers.get_specific_month_info(board_name,
+                                                   year=year,
+                                                   month=month)
+        views.show_specific_month_info(data)
+    elif year:
+        data = controllers.get_specific_year_info(board_name,
+                                                  year=year)
+        views.show_specific_year_info(data)
+
+
 def main():
     args = get_args()
     utils.create_dir_if_not_exists()
@@ -112,6 +137,10 @@ def main():
         store_board_info(args.board_name)
     if hasattr(args, 'article_path'):
         store_article_info(args.article_path)
+    if hasattr(args, 'board_to_show') and hasattr(args, 'date'):
+        date_list = list(map(int, filter(bool, args.date.split('.'))))
+        date_list += [None]*(3-len(date_list))
+        show_board_info(args.board_to_show, tuple(date_list))
 
 
 if __name__ == "__main__":
