@@ -9,6 +9,7 @@ import requests
 from . import constants
 from . import controllers
 from . import models
+from . import utils
 
 
 def get_args():
@@ -48,7 +49,7 @@ def get_args():
 
 
 def store_board_info(board_name):
-    # TODO: from_year and to_year selection
+    # TODO: [#5] from_year and to_year selection
     board = ptt_crawler.Board(board_name, verify=True)
     articles = board.articles()
 
@@ -89,13 +90,14 @@ def store_article_info(article_path):
     except:
         print("Unknown Page. Use this format: /bbs/${board}/${id}.html")
     else:
-        # TODO: get the content of article and store it to db
+        # TODO: [#2] get the content of article and store it to db
         print(board.get_url(article_path))
         print(page, type(page))
 
 
 def main():
     args = get_args()
+    utils.create_dir_if_not_exists()
 
     if hasattr(args, 'board_name'):
         store_board_info(args.board_name)
