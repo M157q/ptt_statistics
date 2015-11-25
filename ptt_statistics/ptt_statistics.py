@@ -17,32 +17,41 @@ def get_args():
     sub_p = p.add_subparsers(title='subcommands',
                              help="use ${sub-command} -h for further usage")
 
-    # subcommand: board
-    p_board = sub_p.add_parser('board',
-                               help="Craw the specific board")
-    p_board.add_argument('board_name', help="The name of the board")
-    p_board.add_argument('--from-year', nargs='?', type=int,
+    # subcommand: crawl
+    p_board = sub_p.add_parser('crawl',
+                               help="Crawl the specific board")
+    p_board.add_argument('board_name',
+                         type=str,
+                         help="The name of the board")
+    p_board.add_argument('--from-year',
+                         nargs='?',
+                         type=int,
                          default=datetime.MINYEAR,
                          help="default: {}".format(datetime.MINYEAR))
-    p_board.add_argument('--to-year', nargs='?', type=int,
+    p_board.add_argument('--to-year',
+                         nargs='?',
+                         type=int,
                          default=datetime.date.today().year,
                          help="default: {}".format(datetime.date.today().year))
 
-    # subcommand: path
-    p_path = sub_p.add_parser('path',
+    # subcommand: get_article
+    p_path = sub_p.add_parser('get_article',
                               help="Get specific article info with path")
     p_path.add_argument('article_path',
+                        type=str,
                         help=("The path of the article on www.ptt.cc"
-                              "\n"
                               "In this format: '/bbs/${board}/${id}.html' "))
 
     # subcommand: show
     p_show = sub_p.add_parser('show',
                               help="Show info of the board via data in db")
     p_show.add_argument('board_to_show',
-                        help="The name of the board for showing its info")
-    p_show.add_argument('show_type',
-                        help="The type for showing the board info")
+                        type=str,
+                        help="The name of the board to show")
+    p_show.add_argument('date',
+                        type=str,
+                        help=("Info about which year of the board to show "
+                              "format: YYYY or YYYY.MM or YYYY.MM.DD"))
 
     args = p.parse_args()
     return args
