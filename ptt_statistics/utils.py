@@ -36,3 +36,9 @@ def check_date_tuple(date_tuple):
             raise ValueError(errmsg)
 
     return (year, month, day)
+
+
+def get_format_len_of_num(num):
+    l = len(str(num))
+    l += (l-1)//3
+    return l
