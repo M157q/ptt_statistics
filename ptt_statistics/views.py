@@ -24,8 +24,8 @@ def show_specific_year_info(data):
             n_of_month_articles/data['articles']['total']))
     print("")
 
-    print("## 總發文人數")
-    print("ID 不重複狀況下，共 {:,} 人".format(data['authors']['total']))
+    print("## 發文帳號總數")
+    print("共 {:,} 人".format(data['authors']['total']))
     print("")
 
     print("## 總留言數")
