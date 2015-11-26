@@ -160,13 +160,47 @@ def store_comment(comment, article, board):
         orm.show(comment_entity)
 
 
+@orm.db_session
 def get_specific_day_info(board_name, **kargs):
     pass
 
 
+@orm.db_session
 def get_specific_month_info(board_name, **kargs):
     pass
 
 
+@orm.db_session
 def get_specific_year_info(board_name, **kargs):
-    pass
+
+    articles = {}
+    total_articles = orm.select(article for article in models.Article
+                                if article.date.year == kargs['year']
+                                and article.board.name == board_name)
+    articles['total'] = total_articles.count()
+
+    articles['months'] = {month: orm.count(article
+                                           for article in total_articles
+                                           if article.date.month == month)
+                          for month in range(1, 13)}
+
+    authors = {}
+    authors['total'] = orm.count(article.user for article in total_articles)
+
+    comments = {}
+    total_comments = orm.select(comment
+                                for comment in models.Comment
+                                if comment.date.year == kargs['year']
+                                and comment.article.board.name == board_name)
+    tag_names = orm.select(tag.name for tag in models.CommentTag)
+    comments['total'] = total_comments.count()
+    comments['tags'] = {tag_name: orm.count(comment
+                                            for comment in total_comments
+                                            if comment.tag.name == tag_name)
+                        for tag_name in tag_names}
+
+    data = {}
+    sub_dicts = ('articles', 'authors', 'comments')
+    for sub_dict in sub_dicts:
+        data[sub_dict] = eval(sub_dict)
+    return data

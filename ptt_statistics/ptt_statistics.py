@@ -68,9 +68,6 @@ def store_board_info(board_name):
     except:
         return
     else:
-        models.db.bind('sqlite', constants.db_path, create_db=True)
-        models.db.generate_mapping(create_tables=True, check_tables=True)
-
         controllers.store_board(board)
 
         while True:
@@ -132,6 +129,8 @@ def show_board_info(board_name, date_tuple):
 def main():
     args = get_args()
     utils.create_dir_if_not_exists()
+    models.db.bind('sqlite', constants.db_path, create_db=True)
+    models.db.generate_mapping(create_tables=True, check_tables=True)
 
     if hasattr(args, 'board_name'):
         store_board_info(args.board_name)
