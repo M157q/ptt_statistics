@@ -198,13 +198,20 @@ def get_specific_year_info(board_name, **kargs):
             'tags': eval(board_year_record_entity.comments_tags),
             'total_users': board_year_record_entity.comments_total_users,
         }
+        users = {
+            'total': board_year_record_entity.users_total,
+            'comment_or_post':
+                eval(board_year_record_entity.users_comment_or_post),
+        }
 
     else:
-        # '''
+        # Articles
+        total_articles = orm.select(
+            article for article in models.Article
+            if article.date.year == kargs['year']
+            and article.board.name == board_name
+        )
         articles = {}
-        total_articles = orm.select(article for article in models.Article
-                                    if article.date.year == kargs['year']
-                                    and article.board.name == board_name)
         articles['total'] = total_articles.count()
 
         articles['months'] = {
@@ -217,16 +224,15 @@ def get_specific_year_info(board_name, **kargs):
 
         articles['total_users'] = orm.count(article.user
                                             for article in total_articles)
-        # '''
 
-        # '''
-        comments = {}
+        # Comments
         total_comments = orm.select(
             comment
             for comment in models.Comment
             if comment.date.year == kargs['year']
             and comment.article.board.name == board_name
         )
+        comments = {}
         tag_names = orm.select(tag.name for tag in models.CommentTag)
         comments['total'] = total_comments.count()
         comments['tags'] = {
@@ -240,7 +246,30 @@ def get_specific_year_info(board_name, **kargs):
 
         comments['total_users'] = orm.count(comment.user
                                             for comment in total_comments)
-        # '''
+
+        # Users
+        users = {}
+        users['comment_or_post'] = {}
+        users['comment_or_post']['發文且留言'] = orm.count(
+            article.user
+            for article in total_articles
+            if article.user.comments.select(
+                lambda c: c.date.year == kargs['year']
+            )
+        )
+        users['comment_or_post']['只留言'] = (
+            comments['total_users'] - users['comment_or_post']['發文且留言']
+        )
+        users['comment_or_post']['只發文'] = (
+            articles['total_users'] - users['comment_or_post']['發文且留言']
+        )
+
+        users['total'] = {}
+        users['total'] = (
+            articles['total_users'] + comments['total_users']
+            - users['comment_or_post']['發文且留言']
+        )
+        pprint(users)
 
         board_year_record_entity = models.BoardYearRecord(
             year=kargs['year'],
@@ -252,12 +281,14 @@ def get_specific_year_info(board_name, **kargs):
             comments_total=comments['total'],
             comments_tags=comments['tags'].__str__(),
             comments_total_users=comments['total_users'],
+            users_total=users['total'],
+            users_comment_or_post=users['comment_or_post'].__str__(),
         )
 
         orm.show(board_year_record_entity)
 
     data = {}
-    sub_dicts = ('articles', 'comments')
+    sub_dicts = ('articles', 'comments', 'users')
     # sub_dicts = ('comments',)
     for sub_dict in sub_dicts:
         data[sub_dict] = eval(sub_dict)

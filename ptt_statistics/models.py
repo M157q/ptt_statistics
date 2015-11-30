@@ -25,6 +25,8 @@ class BoardYearRecord(db.Entity):
     comments_total = orm.Optional(int, nullable=True)
     comments_tags = orm.Optional(orm.LongStr, nullable=True)
     comments_total_users = orm.Optional(int, nullable=True)
+    users_total = orm.Optional(int, nullable=True)
+    users_comment_or_post = orm.Optional(orm.LongStr, nullable=True)
 
     orm.composite_key(year, board)
 
