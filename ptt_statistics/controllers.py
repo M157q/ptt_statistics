@@ -5,6 +5,7 @@ from pprint import pprint
 from pony import orm
 
 from . import models
+from . import exceptions
 
 
 @orm.db_session
@@ -173,34 +174,92 @@ def get_specific_month_info(board_name, **kargs):
 @orm.db_session
 def get_specific_year_info(board_name, **kargs):
 
-    articles = {}
-    total_articles = orm.select(article for article in models.Article
-                                if article.date.year == kargs['year']
-                                and article.board.name == board_name)
-    articles['total'] = total_articles.count()
+    board_entity = models.Board.get(name=board_name)
 
-    articles['months'] = {month: orm.count(article
-                                           for article in total_articles
-                                           if article.date.month == month)
-                          for month in range(1, 13)}
+    if board_entity is None:
+        raise exceptions.NoBoardError(board_name)
 
-    authors = {}
-    authors['total'] = orm.count(article.user for article in total_articles)
+    board_year_record_entity = models.BoardYearRecord.get(
+        year=kargs['year'],
+        board=board_entity.id
+    )
 
-    comments = {}
-    total_comments = orm.select(comment
-                                for comment in models.Comment
-                                if comment.date.year == kargs['year']
-                                and comment.article.board.name == board_name)
-    tag_names = orm.select(tag.name for tag in models.CommentTag)
-    comments['total'] = total_comments.count()
-    comments['tags'] = {tag_name: orm.count(comment
-                                            for comment in total_comments
-                                            if comment.tag.name == tag_name)
-                        for tag_name in tag_names}
+    if (
+        board_year_record_entity
+        and board_year_record_entity.update_time > board_entity.update_time
+    ):
+        articles = {
+            'total': board_year_record_entity.articles_total,
+            'months': eval(board_year_record_entity.articles_months),
+            'total_users': board_year_record_entity.articles_total_users,
+        }
+        comments = {
+            'total': board_year_record_entity.comments_total,
+            'tags': eval(board_year_record_entity.comments_tags),
+            'total_users': board_year_record_entity.comments_total_users,
+        }
+
+    else:
+        # '''
+        articles = {}
+        total_articles = orm.select(article for article in models.Article
+                                    if article.date.year == kargs['year']
+                                    and article.board.name == board_name)
+        articles['total'] = total_articles.count()
+
+        articles['months'] = {
+            month: orm.count(
+                article
+                for article in total_articles
+                if article.date.month == month)
+            for month in range(1, 13)
+        }
+
+        articles['total_users'] = orm.count(article.user
+                                            for article in total_articles)
+        # '''
+
+        # '''
+        comments = {}
+        total_comments = orm.select(
+            comment
+            for comment in models.Comment
+            if comment.date.year == kargs['year']
+            and comment.article.board.name == board_name
+        )
+        tag_names = orm.select(tag.name for tag in models.CommentTag)
+        comments['total'] = total_comments.count()
+        comments['tags'] = {
+            tag_name: orm.count(
+                comment
+                for comment in total_comments
+                if comment.tag.name == tag_name
+            )
+            for tag_name in tag_names
+        }
+
+        comments['total_users'] = orm.count(comment.user
+                                            for comment in total_comments)
+        # '''
+
+        board_year_record_entity = models.BoardYearRecord(
+            year=kargs['year'],
+            board=board_entity.id,
+            update_time=datetime.datetime.now(),
+            articles_total=articles['total'],
+            articles_months=articles['months'].__str__(),
+            articles_total_users=articles['total_users'],
+            comments_total=comments['total'],
+            comments_tags=comments['tags'].__str__(),
+            comments_total_users=comments['total_users'],
+        )
+
+        orm.show(board_year_record_entity)
 
     data = {}
-    sub_dicts = ('articles', 'authors', 'comments')
+    sub_dicts = ('articles', 'comments')
+    # sub_dicts = ('comments',)
     for sub_dict in sub_dicts:
         data[sub_dict] = eval(sub_dict)
+
     return data

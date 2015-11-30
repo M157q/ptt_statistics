@@ -2,14 +2,31 @@ import datetime
 
 from pony import orm
 
+
 db = orm.Database()
 
 
 class Board(db.Entity):
     name = orm.Required(str, unique=True)
+    update_time = orm.Required(datetime.datetime)
     articles = orm.Set("Article")
     article_types = orm.Set("ArticleType")
     article_titles = orm.Set("ArticleTitle")
+    board_year_records = orm.Set("BoardYearRecord")
+
+
+class BoardYearRecord(db.Entity):
+    year = orm.Required(int)
+    board = orm.Required(Board)
+    update_time = orm.Required(datetime.datetime)
+    articles_total = orm.Optional(int, nullable=True)
+    articles_months = orm.Optional(orm.LongStr, nullable=True)
+    articles_total_users = orm.Optional(int, nullable=True)
+    comments_total = orm.Optional(int, nullable=True)
+    comments_tags = orm.Optional(orm.LongStr, nullable=True)
+    comments_total_users = orm.Optional(int, nullable=True)
+
+    orm.composite_key(year, board)
 
 
 class User(db.Entity):

@@ -10,6 +10,7 @@ def show_specific_month_info(data):
 
 
 def show_specific_year_info(data):
+    # '''
     print("## 總文章數")
     print("共 {:,} 篇".format(data['articles']['total']))
     print("")
@@ -23,14 +24,19 @@ def show_specific_year_info(data):
             len_of_month_articles,
             n_of_month_articles/data['articles']['total']))
     print("")
+    # '''
 
+    # '''
     print("## 發文帳號總數")
-    print("共 {:,} 人".format(data['authors']['total']))
+    print("共 {:,} 位".format(data['articles']['total_users']))
     print("")
+    # '''
 
+    # '''
     print("## 總留言數")
     print("共 {:,} 則".format(data['comments']['total']))
     print("")
+
     len_of_coment_tags = max(map(utils.get_format_len_of_num,
                                  data['comments']['tags'].values()))
     for comment_tag, n_of_comment_tags in data['comments']['tags'].items():
@@ -39,3 +45,8 @@ def show_specific_year_info(data):
             n_of_comment_tags,
             len_of_coment_tags,
             n_of_comment_tags/data['comments']['total']))
+    print("")
+
+    print("## 總留言使用者數")
+    print("共 {:,} 位".format(data['comments']['total_users']))
+    # '''
