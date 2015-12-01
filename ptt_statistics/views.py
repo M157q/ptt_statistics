@@ -10,6 +10,13 @@ def show_specific_month_info(data):
 
 
 def show_specific_year_info(data):
+    def show_board_data():
+        print("")
+        print("# {0}版 {1}年統計資料 （最後更新時間：{2}）".format(
+            data['board']['name'],
+            data['board']['year'],
+            data['board']['update_time'].strftime("%Y-%m-%d %H:%M:%S"))
+        )
     def show_articles_data():
         print("")
         print("## 總文章數")
@@ -19,7 +26,8 @@ def show_specific_year_info(data):
 
         len_of_month_articles = max(map(utils.get_format_len_of_num,
                                         data['articles']['months'].values()))
-        for month, n_of_month_articles in data['articles']['months'].items():
+        for month in sorted(data['articles']['months']):
+            n_of_month_articles = data['articles']['months'][month]
             print("+ {0:>2} 月: {1:>{2},} 篇 ({3:6.2%})".format(
                 month,
                 n_of_month_articles,
@@ -43,7 +51,8 @@ def show_specific_year_info(data):
 
         len_of_coment_tags = max(map(utils.get_format_len_of_num,
                                      data['comments']['tags'].values()))
-        for comment_tag, n_of_comment_tags in data['comments']['tags'].items():
+        for comment_tag in sorted(data['comments']['tags']):
+            n_of_comment_tags = data['comments']['tags'][comment_tag]
             print("+ {0}: {1:>{2},} 則 ({3:6.2%})".format(
                 comment_tag,
                 n_of_comment_tags,
@@ -69,7 +78,8 @@ def show_specific_year_info(data):
                                    data['users']['comment_or_post'].keys()))
         len_of_n_of_user_type = max(map(utils.get_format_len_of_num,
                                         data['users']['comment_or_post'].values()))
-        for user_type, n_of_user_type in data['users']['comment_or_post'].items():
+        for user_type in sorted(data['users']['comment_or_post']):
+            n_of_user_type = data['users']['comment_or_post'][user_type]
             print("+ {0:{fill}<{1}}: {2:>{3},} 位 ({4:6.2%})".format(
                 user_type,
                 len_of_user_type,
@@ -80,6 +90,7 @@ def show_specific_year_info(data):
         print("")
 
 
+    show_board_data()
     show_articles_data()
     show_comments_data()
     show_users_data()
