@@ -70,18 +70,35 @@ def show_specific_year_info(data):
         print("共 {:,} 則".format(data['comments']['total']))
         print("")
 
-        len_of_n_of_coment_tags = max(
+        len_of_n_of_comment_tags = max(
             map(
                 utils.get_format_len_of_num,
                 data['comments']['tags'].values()
             )
         )
-        for comment_tag in sorted(data['comments']['tags']):
-            n_of_comment_tags = data['comments']['tags'][comment_tag]
-            print("+ {0}: {1:>{2},} 則 ({3:6.2%})".format(
+        print("|{0:^4}|{1:^{2}}|{3:^8}|".format(
+            "",
+            "留言數",
+            len_of_n_of_comment_tags+2,
+            "比例"
+        ))
+        print("|{0:->{1}}|{2:->{3}}|{4:->{5}}|".format(
+            ':',
+            len("")+4,
+            ':',
+            len_of_n_of_comment_tags+len("留言數")+2,
+            ':',
+            len("比例")+8,
+        ))
+        for comment_tag, n_of_comment_tags in sorted(
+            data['comments']['tags'].items(),
+            key=lambda x: x[1],
+            reverse=True,
+        ):
+            print("| {0} | {1:>{2},} 則 | ({3:6.2%}) |".format(
                 comment_tag,
                 n_of_comment_tags,
-                len_of_n_of_coment_tags,
+                len_of_n_of_comment_tags,
                 n_of_comment_tags/data['comments']['total']))
         print("")
 
