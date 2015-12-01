@@ -127,9 +127,28 @@ def show_specific_year_info(data):
                 data['users']['comment_or_post'].values()
             )
         )
-        for user_type in sorted(data['users']['comment_or_post']):
-            n_of_user_type = data['users']['comment_or_post'][user_type]
-            print("+ {0:{fill}<{1}}: {2:>{3},} 位 ({4:6.2%})".format(
+        print("|{0:{fill}^{1}}|{2:^{3}}|{4:^8}|".format(
+            "類型",
+            len_of_user_type+1,
+            "人數",
+            len_of_n_of_user_type+3,
+            "比例",
+            fill='　'  # Use fullwidth space for Chinese character
+        ))
+        print("|{0:->{1}}|{2:->{3}}|{4:->{5}}|".format(
+            ':',
+            len_of_user_type*2+2,
+            ':',
+            len_of_n_of_user_type+len("人數")+3,
+            ':',
+            len("比例")+8,
+        ))
+        for user_type, n_of_user_type in sorted(
+            data['users']['comment_or_post'].items(),
+            key=lambda x: x[1],
+            reverse=True
+        ):
+            print("| {0:{fill}<{1}} | {2:>{3},} 位 | ({4:6.2%}) |".format(
                 user_type,
                 len_of_user_type,
                 n_of_user_type,
