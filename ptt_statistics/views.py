@@ -34,9 +34,23 @@ def show_specific_year_info(data):
                 data['articles']['months'].values()
             )
         )
+        print("|{0:^5}|{1:^{2}}|{3:^8}|".format(
+            "月份",
+            "文章數",
+            len_of_n_of_month_articles+2,
+            "比例",
+        ))
+        print("|{0:->{1}}|{2:->{3}}|{4:->{5}}|".format(
+            ':',
+            len("月份")+5,
+            ':',
+            len_of_n_of_month_articles+len("文章數")+2,
+            ':',
+            len("比例")+8,
+        ))
         for month in sorted(data['articles']['months']):
             n_of_month_articles = data['articles']['months'][month]
-            print("+ {0:>2} 月: {1:>{2},} 篇 ({3:6.2%})".format(
+            print("| {0:>2} 月 | {1:>{2},} 篇 | ({3:6.2%}) |".format(
                 month,
                 n_of_month_articles,
                 len_of_n_of_month_articles,
