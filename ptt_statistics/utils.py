@@ -1,6 +1,7 @@
 import calendar
 import datetime
 import os
+from collections import namedtuple
 
 from . import constants
 
@@ -38,7 +39,39 @@ def check_date_tuple(date_tuple):
     return (year, month, day)
 
 
-def get_format_len_of_num(num):
-    l = len(str(num))
-    l += (l-1)//3
+def get_format_len_of_str(s):
+    return len(str(s))
+
+
+def get_format_len_of_num(n):
+    l = get_format_len_of_str(n)
+    l += (get_format_len_of_str(n)-1)//3
     return l
+
+
+def get_n_ranked_data_from_dict(original_dict, n=100):
+    rank = 1
+    total = 0
+    n_ranked_data = []
+    RankedDatum = namedtuple('RankedDatum', ['rank', 'name', 'value'])
+    last_value = None
+    sorted_original_dict = sorted(original_dict.items(),
+                                  key=lambda x: x[1],
+                                  reverse=True)
+
+    for name, value in sorted_original_dict:
+        total += 1
+
+        if last_value is None:
+            last_value = value
+
+        if last_value > value:
+            last_value = value
+            rank = total
+
+        if rank > 100:
+            break
+
+        n_ranked_data.append(RankedDatum(rank, name, value))
+
+    return n_ranked_data

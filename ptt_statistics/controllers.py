@@ -1,5 +1,6 @@
 import re
 import datetime
+from collections import defaultdict
 from pprint import pprint
 
 from pony import orm
@@ -191,7 +192,7 @@ def get_specific_year_info(board_name, **kargs):
         board = {
             'name': board_entity.name,
             'year': kargs['year'],
-            'update_time': board_year_record_entity.update_time,
+            'update_time': board_entity.update_time,
         }
         articles = {
             'total': board_year_record_entity.articles_total,
@@ -208,15 +209,32 @@ def get_specific_year_info(board_name, **kargs):
             'comment_or_post':
                 eval(board_year_record_entity.users_comment_or_post),
         }
+        top_n = {
+            'total_articles': eval(
+                board_year_record_entity.top_n_total_articles
+            ),
+            'total_push_comments_gained': eval(
+                board_year_record_entity.top_n_total_push_comments_gained
+            ),
+            'total_boo_comments_gained': eval(
+                board_year_record_entity.top_n_total_boo_comments_gained
+            ),
+            'total_push_comments_used': eval(
+                board_year_record_entity.top_n_total_push_comments_used
+            ),
+            'total_boo_comments_used': eval(
+                board_year_record_entity.top_n_total_boo_comments_used
+            ),
+        }
 
     else:
-        # Board
         update_time = datetime.datetime.now()
-        board = {
-            'name': board_entity.name,
-            'year': kargs['year'],
-            'update_time': update_time,
-        }
+
+        # Board
+        board = {}
+        board['name'] = board_entity.name
+        board['year'] = kargs['year']
+        board['update_time'] = update_time
 
         # Articles
         total_articles = orm.select(
@@ -283,24 +301,62 @@ def get_specific_year_info(board_name, **kargs):
             - users['comment_or_post']['發文且留言']
         )
 
+        # Top N
+        top_n = {}
+        top_n['total_articles'] = defaultdict(int)
+        top_n['total_push_comments_gained'] = defaultdict(int)
+        top_n['total_boo_comments_gained'] = defaultdict(int)
+        for article in total_articles:
+            author = article.user.identifier
+            top_n['total_articles'][author] += 1
+
+            for comment in article.comments:
+                if comment.tag.name == '推':
+                    top_n['total_push_comments_gained'][author] += 1
+                if comment.tag.name == '噓':
+                    top_n['total_boo_comments_gained'][author] += 1
+
+        top_n['total_push_comments_used'] = defaultdict(int)
+        top_n['total_boo_comments_used'] = defaultdict(int)
+        for comment in total_comments:
+            if comment.tag.name == '推':
+                top_n['total_push_comments_used'][comment.user.identifier] += 1
+            if comment.tag.name == '噓':
+                top_n['total_boo_comments_used'][comment.user.identifier] += 1
+
         board_year_record_entity = models.BoardYearRecord(
             year=kargs['year'],
             board=board_entity.id,
             update_time=update_time,
             articles_total=articles['total'],
-            articles_months=articles['months'].__str__(),
+            articles_months=repr(articles['months']),
             articles_total_users=articles['total_users'],
             comments_total=comments['total'],
-            comments_tags=comments['tags'].__str__(),
+            comments_tags=repr(comments['tags']),
             comments_total_users=comments['total_users'],
             users_total=users['total'],
-            users_comment_or_post=users['comment_or_post'].__str__(),
+            users_comment_or_post=repr(users['comment_or_post']),
+            top_n_total_articles=repr(
+                top_n['total_articles']
+            ).replace("<class 'int'>", "int"),
+            top_n_total_push_comments_gained=repr(
+                top_n['total_push_comments_gained']
+            ).replace("<class 'int'>", "int"),
+            top_n_total_boo_comments_gained=repr(
+                top_n['total_boo_comments_gained']
+            ).replace("<class 'int'>", "int"),
+            top_n_total_push_comments_used=repr(
+                top_n['total_push_comments_used']
+            ).replace("<class 'int'>", "int"),
+            top_n_total_boo_comments_used=repr(
+                top_n['total_boo_comments_used']
+            ).replace("<class 'int'>", "int"),
         )
 
         orm.show(board_year_record_entity)
 
     data = {}
-    sub_dicts = ('board', 'articles', 'comments', 'users')
+    sub_dicts = ('board', 'articles', 'comments', 'users', 'top_n')
     for sub_dict in sub_dicts:
         data[sub_dict] = eval(sub_dict)
 

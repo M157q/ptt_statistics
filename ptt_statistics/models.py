@@ -27,6 +27,11 @@ class BoardYearRecord(db.Entity):
     comments_total_users = orm.Optional(int, nullable=True)
     users_total = orm.Optional(int, nullable=True)
     users_comment_or_post = orm.Optional(orm.LongStr, nullable=True)
+    top_n_total_articles = orm.Optional(orm.LongStr, nullable=True)
+    top_n_total_push_comments_gained = orm.Optional(orm.LongStr, nullable=True)
+    top_n_total_boo_comments_gained = orm.Optional(orm.LongStr, nullable=True)
+    top_n_total_push_comments_used = orm.Optional(orm.LongStr, nullable=True)
+    top_n_total_boo_comments_used = orm.Optional(orm.LongStr, nullable=True)
 
     orm.composite_key(year, board)
 
