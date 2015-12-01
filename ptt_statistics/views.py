@@ -194,16 +194,38 @@ def show_specific_year_info(data):
                     (t.value for t in top_n_data)
                 )
             )
-            s = "+ 第 {0:>{1},} 名 {2:>{3}} {4:>{5},} 篇 ({6:6.2%})"
+            s = "|{0:^{1}}|{2:^{3}}|{4:^{5}}|{6:^8}|"
+            print(s.format(
+                "名次",
+                len_of_rank+2,
+                "帳號",
+                len_of_user,
+                "文章數",
+                len_of_n_of_articles+2,
+                "比例"
+            ))
+            s = "|{0:->{1}}|{2:->{3}}|{4:->{5}}|{6:->{7}}|"
+            print(s.format(
+                ':',
+                len_of_rank+len("名次")+2,
+                ':',
+                len_of_user+len("帳號"),
+                ':',
+                len_of_n_of_articles+len("文章數")+2,
+                ':',
+                len("比例")+8
+            ))
+            s = "| {0:>{1},} | {2:>{3}} | {4:>{5},} 篇 | ({6:6.2%}) |"
             for t in top_n_data:
                 print(s.format(
                     t.rank,
-                    len_of_rank,
+                    len_of_rank+2,
                     t.name,
                     len_of_user,
                     t.value,
                     len_of_n_of_articles,
-                    t.value/data['articles']['total']))
+                    t.value/data['articles']['total']
+                ))
 
             sum_of_top_n_data_values = sum(t.value for t in top_n_data)
             print("")
