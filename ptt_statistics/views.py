@@ -187,31 +187,37 @@ def show_specific_year_info(data):
                 'num'
             )
             format_len_of_data_of_value = max(
-                len(header_of_value)*2,
-                format_len_of_value + 1 + len(count_word_of_value)*2
+                (len(header_of_value)*2 +
+                 len(' (') + len(count_word_of_value)*2 + len(')')),
+                format_len_of_value
             )
             format_len_of_percentage = 6
-            format_len_of_data_of_percentage = format_len_of_percentage + 2
+            format_len_of_data_of_percentage = max(
+                len(header_of_percentage),
+                format_len_of_percentage
+            )
             header = "| {0:^{1}} | {2:^{3}} | {4:^{5}} | {6:^{7}} |"
             print(header.format(
                 header_of_rank,
-                format_len_of_data_of_rank-len(header_of_rank),
+                format_len_of_data_of_rank - len(header_of_rank),
                 header_of_user,
-                format_len_of_data_of_user-len(header_of_user),
-                header_of_value,
-                format_len_of_data_of_value-len(header_of_value),
+                format_len_of_data_of_user - len(header_of_user),
+                "{} ({})".format(header_of_value, count_word_of_value),
+                (format_len_of_data_of_value -
+                 len(header_of_value) -
+                 len(count_word_of_value)),
                 header_of_percentage,
-                format_len_of_data_of_percentage-len(header_of_percentage)
+                format_len_of_data_of_percentage - len(header_of_percentage)
             ))
             separator = "|{0:->{1}}|{0:->{2}}|{0:->{3}}|{0:->{4}}|"
             print(separator.format(
                 ':',
-                format_len_of_data_of_rank + 2,
-                format_len_of_data_of_user + 2,
-                format_len_of_data_of_value + 2,
-                format_len_of_data_of_percentage + 2
+                len(' ') + format_len_of_data_of_rank + len(' '),
+                len(' ') + format_len_of_data_of_user + len(' '),
+                len(' ') + format_len_of_data_of_value + len(' '),
+                len(' ') + format_len_of_data_of_percentage + len(' ')
             ))
-            datum = "| {0:>{1},} | {2:>{3}} | {4:>{5},} {6} | ({7:6.2%}) |"
+            datum = "| {0:>{1},} | {2:>{3}} | {4:>{5},} | {6:6.2%} |"
             for t in top_n_data:
                 print(datum.format(
                     t.rank,
@@ -219,8 +225,7 @@ def show_specific_year_info(data):
                     t.name,
                     format_len_of_data_of_user,
                     t.value,
-                    format_len_of_value,
-                    count_word_of_value,
+                    format_len_of_data_of_value,
                     t.value/denominator_of_percentage
                 ))
 
@@ -268,18 +273,40 @@ def show_specific_year_info(data):
                 name_of_denominator_of_percentage='總留言數'
             )
 
+        def show_top_n_total_push_comments_used(n):
+            show_top_n_data_template(
+                title="最多「使用」推文數",
+                n=n,
+                dict_data=data['top_n']['total_push_comments_used'],
+                header_of_value='推文使用量',
+                count_word_of_value='則',
+                denominator_of_percentage=data['comments']['total'],
+                name_of_denominator_of_percentage='總留言數'
+            )
+
+        def show_top_n_total_boo_comments_used(n):
+            show_top_n_data_template(
+                title="最多「使用」噓文數",
+                n=n,
+                dict_data=data['top_n']['total_boo_comments_used'],
+                header_of_value='噓文使用量',
+                count_word_of_value='則',
+                denominator_of_percentage=data['comments']['total'],
+                name_of_denominator_of_percentage='總留言數'
+            )
+
         '''
         "average_push_comments_gained": "平均被推文數",
-        "total_boo_comments_gained": "最多「被」噓文",
         "average_boo_comments_gained": "平均被噓文數",
-        "total_push_comments_used": "最多「使用」推文",
-        "total_boo_comments_used": "最多「使用」噓文",
         '''
 
         show_top_n_total_articles(n)
         show_top_n_total_push_comments_gained(n)
         # show_top_n_average_push_comments_gained(n)
         show_top_n_total_boo_comments_gained(n)
+        # show_top_n_average_boo_comments_gained(n)
+        show_top_n_total_push_comments_used(n)
+        show_top_n_total_boo_comments_used(n)
 
     show_board_data()
     show_articles_data()
