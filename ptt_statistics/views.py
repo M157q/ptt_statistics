@@ -115,7 +115,7 @@ def show_specific_year_info(data):
         print("共 {:,} 位".format(data['users']['total']))
         print("")
 
-        len_of_user_type = max(
+        format_len_of_user_type = max(
             map(
                 utils.get_format_len_of_str,
                 data['users']['comment_or_post'].keys()
@@ -129,7 +129,7 @@ def show_specific_year_info(data):
         )
         print("|{0:{fill}^{1}}|{2:^{3}}|{4:^8}|".format(
             "類型",
-            len_of_user_type+1,
+            format_len_of_user_type+1,
             "人數",
             len_of_n_of_user_type+3,
             "比例",
@@ -137,7 +137,7 @@ def show_specific_year_info(data):
         ))
         print("|{0:->{1}}|{2:->{3}}|{4:->{5}}|".format(
             ':',
-            len_of_user_type*2+2,
+            format_len_of_user_type*2+2,
             ':',
             len_of_n_of_user_type+len("人數")+3,
             ':',
@@ -150,7 +150,7 @@ def show_specific_year_info(data):
         ):
             print("| {0:{fill}<{1}} | {2:>{3},} 位 | ({4:6.2%}) |".format(
                 user_type,
-                len_of_user_type,
+                format_len_of_user_type,
                 n_of_user_type,
                 len_of_n_of_user_type,
                 n_of_user_type/data['users']['total'],
@@ -158,146 +158,98 @@ def show_specific_year_info(data):
         print("")
 
     def show_top_n_data(n=100):
-        def show_top_n_total_articles(n):
+        def show_top_n_data_template(
+            title=None,
+            n=None,
+            dict_data=None,
+            header_of_rank='名次',
+            header_of_user='帳號',
+            header_of_value=None,
+            header_of_percentage='比例',
+            count_word_of_value=None,
+            denominator_of_percentage=None
+        ):
+
             print("")
-            print("## 最多發文數 前 {} 名".format(n))
+            print("## {} 前 {} 名".format(title, n))
             print("")
 
-            top_n_data = utils.get_n_ranked_data_from_dict(
-                data['top_n']['total_articles'],
-                n
+            top_n_data = utils.get_n_ranked_data_from_dict(dict_data, n)
+            format_len_of_rank = utils.get_format_len_of_container(
+                (t.rank for t in top_n_data),
+                'num'
             )
-            len_of_rank = max(
-                map(
-                    utils.get_format_len_of_num,
-                    (t.rank for t in top_n_data)
-                )
+            format_len_of_user = utils.get_format_len_of_container(
+                (t.name for t in top_n_data),
+                'str'
             )
-            len_of_user = max(
-                map(
-                    utils.get_format_len_of_str,
-                    (t.name for t in top_n_data)
-                )
+            format_len_of_value = utils.get_format_len_of_container(
+                (t.value for t in top_n_data),
+                'num'
             )
-            len_of_n_of_articles = max(
-                map(
-                    utils.get_format_len_of_num,
-                    (t.value for t in top_n_data)
-                )
-            )
-            s = "|{0:^{1}}|{2:^{3}}|{4:^{5}}|{6:^8}|"
-            print(s.format(
-                "名次",
-                len_of_rank+2,
-                "帳號",
-                len_of_user,
-                "文章數",
-                len_of_n_of_articles+2,
-                "比例"
+            header = "|{0:^{1}}|{2:^{3}}|{4:^{5}}|{6:^8}|"
+            print(header.format(
+                header_of_rank,
+                format_len_of_rank+2,
+                header_of_user,
+                format_len_of_user,
+                header_of_value,
+                format_len_of_value+2,
+                header_of_percentage
             ))
-            s = "|{0:->{1}}|{2:->{3}}|{4:->{5}}|{6:->{7}}|"
-            print(s.format(
+            separator = "|{0:->{1}}|{0:->{2}}|{0:->{3}}|{0:->{4}}|"
+            print(separator.format(
                 ':',
-                len_of_rank+len("名次")+2,
-                ':',
-                len_of_user+len("帳號"),
-                ':',
-                len_of_n_of_articles+len("文章數")+2,
-                ':',
-                len("比例")+8
+                format_len_of_rank+len(header_of_rank)+2,
+                format_len_of_user+len(header_of_user),
+                format_len_of_value+len(header_of_value)+2,
+                len(header_of_percentage)+8
             ))
-            s = "| {0:>{1},} | {2:>{3}} | {4:>{5},} 篇 | ({6:6.2%}) |"
+            datum = "| {0:>{1},} | {2:>{3}} | {4:>{5},} {6} | ({7:6.2%}) |"
             for t in top_n_data:
-                print(s.format(
+                print(datum.format(
                     t.rank,
-                    len_of_rank+2,
+                    format_len_of_rank+2,
                     t.name,
-                    len_of_user,
+                    format_len_of_user,
                     t.value,
-                    len_of_n_of_articles,
-                    t.value/data['articles']['total']
+                    format_len_of_value,
+                    count_word_of_value,
+                    t.value/denominator_of_percentage
                 ))
 
             sum_of_top_n_data_values = sum(t.value for t in top_n_data)
             print("")
-            print("共 {0:>{1},} 篇，佔年度發文數 {2:6.2%}".format(
+            print("共 {0:>{1},} {2}，佔年度{3} {4:6.2%}".format(
                 sum_of_top_n_data_values,
                 utils.get_format_len_of_num(sum_of_top_n_data_values),
-                sum_of_top_n_data_values/data['articles']['total']
+                count_word_of_value,
+                header_of_value,
+                sum_of_top_n_data_values/denominator_of_percentage
             ))
             print("")
+
+        def show_top_n_total_articles(n):
+            show_top_n_data_template(
+                title="最多發文數",
+                n=n,
+                dict_data=data['top_n']['total_articles'],
+                header_of_value='發文數',
+                count_word_of_value='篇',
+                denominator_of_percentage=data['articles']['total']
+            )
 
         def show_top_n_total_push_comments_gained(n):
-            print("")
-            print("## 最多「被」推文數 前 {} 名".format(n))
-            print("")
-
-            top_n_data = utils.get_n_ranked_data_from_dict(
-                data['top_n']['total_push_comments_gained'],
-                n
+            show_top_n_data_template(
+                title="最多「被」推文數",
+                n=n,
+                dict_data=data['top_n']['total_push_comments_gained'],
+                header_of_value='被推文數',
+                count_word_of_value='則',
+                denominator_of_percentage=data['comments']['total']
             )
-            len_of_rank = max(
-                map(
-                    utils.get_format_len_of_num,
-                    (t.rank for t in top_n_data)
-                )
-            )
-            len_of_user = max(
-                map(
-                    utils.get_format_len_of_str,
-                    (t.name for t in top_n_data)
-                )
-            )
-            len_of_n_of_push_comments_gained = max(
-                map(
-                    utils.get_format_len_of_num,
-                    (t.value for t in top_n_data)
-                )
-            )
-            s = "|{0:^{1}}|{2:^{3}}|{4:^{5}}|{6:^8}|"
-            print(s.format(
-                "名次",
-                len_of_rank+2,
-                "帳號",
-                len_of_user,
-                "被推文數",
-                len_of_n_of_push_comments_gained+1,
-                "比例"
-            ))
-            s = "|{0:->{1}}|{2:->{3}}|{4:->{5}}|{6:->{7}}|"
-            print(s.format(
-                ':',
-                len_of_rank+len("名次")+2,
-                ':',
-                len_of_user+len("帳號"),
-                ':',
-                len_of_n_of_push_comments_gained+len("被推文數")+1,
-                ':',
-                len("比例")+8
-            ))
-            s = "| {0:>{1},} | {2:>{3}} | {4:>{5},} 則 | ({6:6.2%}) |"
-            for t in top_n_data:
-                print(s.format(
-                    t.rank,
-                    len_of_rank+2,
-                    t.name,
-                    len_of_user,
-                    t.value,
-                    len_of_n_of_push_comments_gained,
-                    t.value/data['comments']['total']
-                ))
-
-            sum_of_top_n_data_values = sum(t.value for t in top_n_data)
-            print("")
-            print("共 {0:>{1},} 則，佔年度留言數 {2:6.2%}".format(
-                sum_of_top_n_data_values,
-                utils.get_format_len_of_num(sum_of_top_n_data_values),
-                sum_of_top_n_data_values/data['comments']['total']
-            ))
-            print("")
 
         '''
-        "total_push_comments_gained": "最多「被」推文",
         "average_push_comments_gained": "平均被推文數",
         "total_boo_comments_gained": "最多「被」噓文",
         "average_boo_comments_gained": "平均被噓文數",
@@ -307,9 +259,10 @@ def show_specific_year_info(data):
 
         show_top_n_total_articles(n)
         show_top_n_total_push_comments_gained(n)
+        # show_top_n_average_push_comments_gained(n)
 
-    show_board_data()
-    show_articles_data()
-    show_comments_data()
-    show_users_data()
-    show_top_n_data(n=100)
+    # show_board_data()
+    # show_articles_data()
+    # show_comments_data()
+    # show_users_data()
+    show_top_n_data(n=10)
