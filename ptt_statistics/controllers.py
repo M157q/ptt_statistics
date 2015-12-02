@@ -13,13 +13,16 @@ from . import exceptions
 def store_board(board):
     board_entity = models.Board.get(name=board.name)
 
+    update_time = datetime.datetime.now()
     if board_entity is None:
         board_entity = models.Board(
             name=board.name,
-            update_time=datetime.datetime.now()
+            update_time=update_time
         )
+    else:
+        board_entity.update_time = update_time
 
-    # orm.show(board_entity)
+    orm.show(board_entity)
 
 
 @orm.db_session
@@ -28,6 +31,7 @@ def store_article(article, board):
     article_entity = models.Article.get(identifier=article.id,
                                         board=board_entity)
 
+    update_time = datetime.datetime.now()
     if article_entity is None:
         user_id = (article.author.split()[0]
                    if isinstance(article.author, str)
@@ -71,11 +75,13 @@ def store_article(article, board):
                                         time=article_time,
                                         content=article.content,
                                         board=board_entity,
-                                        update_time=datetime.datetime.now())
+                                        update_time=update_time)
+        board_entity.update_time = update_time
         pprint(vars(article))
         orm.show(article_entity)
     else:
-        article_entity.update_time = datetime.datetime.now()
+        article_entity.update_time = update_time
+        board_entity.update_time = update_time
 
 
 @orm.db_session
@@ -163,6 +169,10 @@ def store_comment(comment, article, board):
                                         time=comment_time,
                                         article=article_entity)
 
+        update_time = datetime.datetime.now()
+        board_entity.update_time = update_time
+        article_entity.update_time = update_time
+
         pprint(comment.items())
         orm.show(comment_entity)
 
@@ -231,7 +241,6 @@ def get_specific_year_info(board_name, **kargs):
                 board_year_record_entity.top_n_total_boo_comments_used
             ),
         }
-
     else:
         update_time = datetime.datetime.now()
 
@@ -239,7 +248,7 @@ def get_specific_year_info(board_name, **kargs):
         board = {}
         board['name'] = board_entity.name
         board['year'] = kargs['year']
-        board['update_time'] = update_time
+        board['update_time'] = board_entity.update_time
 
         # Articles
         total_articles = orm.select(
@@ -329,34 +338,62 @@ def get_specific_year_info(board_name, **kargs):
             if comment.tag.name == '噓':
                 top_n['total_boo_comments_used'][comment.user.identifier] += 1
 
-        board_year_record_entity = models.BoardYearRecord(
-            year=kargs['year'],
-            board=board_entity.id,
-            update_time=update_time,
-            articles_total=articles['total'],
-            articles_months=repr(articles['months']),
-            articles_total_users=articles['total_users'],
-            comments_total=comments['total'],
-            comments_tags=repr(comments['tags']),
-            comments_total_users=comments['total_users'],
-            users_total=users['total'],
-            users_comment_or_post=repr(users['comment_or_post']),
-            top_n_total_articles=repr(
-                top_n['total_articles']
-            ).replace("<class 'int'>", "int"),
-            top_n_total_push_comments_gained=repr(
-                top_n['total_push_comments_gained']
-            ).replace("<class 'int'>", "int"),
-            top_n_total_boo_comments_gained=repr(
-                top_n['total_boo_comments_gained']
-            ).replace("<class 'int'>", "int"),
-            top_n_total_push_comments_used=repr(
-                top_n['total_push_comments_used']
-            ).replace("<class 'int'>", "int"),
-            top_n_total_boo_comments_used=repr(
-                top_n['total_boo_comments_used']
-            ).replace("<class 'int'>", "int"),
-        )
+        if board_year_record_entity:
+            board_year_record_entity.set(
+                update_time=update_time,
+                articles_total=articles['total'],
+                articles_months=repr(articles['months']),
+                articles_total_users=articles['total_users'],
+                comments_total=comments['total'],
+                comments_tags=repr(comments['tags']),
+                comments_total_users=comments['total_users'],
+                users_total=users['total'],
+                users_comment_or_post=repr(users['comment_or_post']),
+                top_n_total_articles=repr(
+                    top_n['total_articles']
+                ).replace("<class 'int'>", "int"),
+                top_n_total_push_comments_gained=repr(
+                    top_n['total_push_comments_gained']
+                ).replace("<class 'int'>", "int"),
+                top_n_total_boo_comments_gained=repr(
+                    top_n['total_boo_comments_gained']
+                ).replace("<class 'int'>", "int"),
+                top_n_total_push_comments_used=repr(
+                    top_n['total_push_comments_used']
+                ).replace("<class 'int'>", "int"),
+                top_n_total_boo_comments_used=repr(
+                     top_n['total_boo_comments_used']
+                ).replace("<class 'int'>", "int"),
+            )
+        else:
+            board_year_record_entity = models.BoardYearRecord(
+                year=kargs['year'],
+                board=board_entity.id,
+                update_time=update_time,
+                articles_total=articles['total'],
+                articles_months=repr(articles['months']),
+                articles_total_users=articles['total_users'],
+                comments_total=comments['total'],
+                comments_tags=repr(comments['tags']),
+                comments_total_users=comments['total_users'],
+                users_total=users['total'],
+                users_comment_or_post=repr(users['comment_or_post']),
+                top_n_total_articles=repr(
+                    top_n['total_articles']
+                ).replace("<class 'int'>", "int"),
+                top_n_total_push_comments_gained=repr(
+                    top_n['total_push_comments_gained']
+                ).replace("<class 'int'>", "int"),
+                top_n_total_boo_comments_gained=repr(
+                    top_n['total_boo_comments_gained']
+                ).replace("<class 'int'>", "int"),
+                top_n_total_push_comments_used=repr(
+                    top_n['total_push_comments_used']
+                ).replace("<class 'int'>", "int"),
+                top_n_total_boo_comments_used=repr(
+                    top_n['total_boo_comments_used']
+                ).replace("<class 'int'>", "int"),
+            )
 
         orm.show(board_year_record_entity)
 
