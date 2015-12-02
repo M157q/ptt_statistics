@@ -28,25 +28,23 @@ def show_specific_year_info(data):
         print("共 {:,} 篇".format(data['articles']['total']))
         print("")
 
-        len_of_n_of_month_articles = max(
-            map(
-                utils.get_format_len_of_num,
-                data['articles']['months'].values()
-            )
+        len_of_n_of_month_articles = utils.get_format_len_of_container(
+            data['articles']['months'].values(),
+            'num'
         )
         print("|{0:^5}|{1:^{2}}|{3:^8}|".format(
             "月份",
             "文章數",
-            len_of_n_of_month_articles+2,
+            len_of_n_of_month_articles + 2,
             "比例",
         ))
         print("|{0:->{1}}|{2:->{3}}|{4:->{5}}|".format(
             ':',
-            len("月份")+5,
+            len("月份") + 5,
             ':',
-            len_of_n_of_month_articles+len("文章數")+2,
+            len_of_n_of_month_articles + len("文章數") + 2,
             ':',
-            len("比例")+8,
+            len("比例") + 8,
         ))
         for month in sorted(data['articles']['months']):
             n_of_month_articles = data['articles']['months'][month]
@@ -70,23 +68,21 @@ def show_specific_year_info(data):
         print("共 {:,} 則".format(data['comments']['total']))
         print("")
 
-        len_of_n_of_comment_tags = max(
-            map(
-                utils.get_format_len_of_num,
-                data['comments']['tags'].values()
-            )
+        len_of_n_of_comment_tags = utils.get_format_len_of_container(
+            data['comments']['tags'].values(),
+            'num'
         )
         print("|{0:^4}|{1:^{2}}|{3:^8}|".format(
             "",
             "留言數",
-            len_of_n_of_comment_tags+2,
+            len_of_n_of_comment_tags + 2,
             "比例"
         ))
         print("|{0:->{1}}|{2:->{3}}|{4:->{5}}|".format(
             ':',
-            len("")+4,
+            len("") + 4,
             ':',
-            len_of_n_of_comment_tags+len("留言數")+2,
+            len_of_n_of_comment_tags + len("留言數") + 2,
             ':',
             len("比例")+8,
         ))
@@ -115,33 +111,27 @@ def show_specific_year_info(data):
         print("共 {:,} 位".format(data['users']['total']))
         print("")
 
-        format_len_of_user_type = max(
-            map(
-                utils.get_format_len_of_str,
-                data['users']['comment_or_post'].keys()
-            )
+        format_len_of_user_type = utils.get_format_len_of_container(
+            data['users']['comment_or_post'].keys(),
+            'str'
         )
-        len_of_n_of_user_type = max(
-            map(
-                utils.get_format_len_of_num,
-                data['users']['comment_or_post'].values()
-            )
+        format_len_of_n_of_user_type = utils.get_format_len_of_container(
+            data['users']['comment_or_post'].values(),
+            'num'
         )
         print("|{0:{fill}^{1}}|{2:^{3}}|{4:^8}|".format(
             "類型",
-            format_len_of_user_type+1,
+            format_len_of_user_type + 1,
             "人數",
-            len_of_n_of_user_type+3,
+            format_len_of_n_of_user_type + 3,
             "比例",
             fill='　'  # Use fullwidth space for Chinese character
         ))
-        print("|{0:->{1}}|{2:->{3}}|{4:->{5}}|".format(
+        print("|{0:->{1}}|{0:->{2}}|{0:->{3}}|".format(
             ':',
-            format_len_of_user_type*2+2,
-            ':',
-            len_of_n_of_user_type+len("人數")+3,
-            ':',
-            len("比例")+8,
+            format_len_of_user_type*2 + 2,
+            format_len_of_n_of_user_type + len("人數") + 3,
+            len("比例") + 8,
         ))
         for user_type, n_of_user_type in sorted(
             data['users']['comment_or_post'].items(),
@@ -152,7 +142,7 @@ def show_specific_year_info(data):
                 user_type,
                 format_len_of_user_type,
                 n_of_user_type,
-                len_of_n_of_user_type,
+                format_len_of_n_of_user_type,
                 n_of_user_type/data['users']['total'],
                 fill='　'))  # Use fullwidth space for Chinese character
         print("")
@@ -198,7 +188,7 @@ def show_specific_year_info(data):
             format_len_of_data_of_value = max(
                 len(header_of_value)*2,
                 format_len_of_value + 1 + len(count_word_of_value)*2
-                )
+            )
             format_len_of_percentage = 6
             format_len_of_data_of_percentage = format_len_of_percentage + 2
             header = "| {0:^{1}} | {2:^{3}} | {4:^{5}} | {6:^{7}} |"
@@ -276,8 +266,8 @@ def show_specific_year_info(data):
         show_top_n_total_push_comments_gained(n)
         # show_top_n_average_push_comments_gained(n)
 
-    # show_board_data()
-    # show_articles_data()
-    # show_comments_data()
-    # show_users_data()
+    show_board_data()
+    show_articles_data()
+    show_comments_data()
+    show_users_data()
     show_top_n_data(n=10)
