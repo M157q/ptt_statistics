@@ -14,7 +14,10 @@ def store_board(board):
     board_entity = models.Board.get(name=board.name)
 
     if board_entity is None:
-        board_entity = models.Board(name=board.name)
+        board_entity = models.Board(
+            name=board.name,
+            update_time=datetime.datetime.now()
+        )
 
     # orm.show(board_entity)
 
