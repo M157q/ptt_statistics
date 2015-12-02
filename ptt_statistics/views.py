@@ -157,7 +157,7 @@ def show_specific_year_info(data):
                 fill='　'))  # Use fullwidth space for Chinese character
         print("")
 
-    def show_top_n_data(n):
+    def show_top_n_data(n=100):
         '''
         "total_push_comments_used": "最多「使用」推文",
         "total_push_comments_gained": "最多「被」推文",
@@ -167,7 +167,7 @@ def show_specific_year_info(data):
         "average_boo_comments_gained": "平均被噓文數",
         '''
 
-        def show_top_n_total_articles(n=100):
+        def show_top_n_total_articles(n):
             print("")
             print("## 最多發文數 前 {} 名".format(n))
             print("")
@@ -236,7 +236,7 @@ def show_specific_year_info(data):
             ))
             print("")
 
-        show_top_n_total_articles(n=100)
+        show_top_n_total_articles(n)
 
     show_board_data()
     show_articles_data()

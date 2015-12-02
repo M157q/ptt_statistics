@@ -69,7 +69,7 @@ def get_n_ranked_data_from_dict(original_dict, n=100):
             last_value = value
             rank = total
 
-        if rank > 100:
+        if rank > n:
             break
 
         n_ranked_data.append(RankedDatum(rank, name, value))
