@@ -136,12 +136,14 @@ def store_comment(comment, article, board):
             comment_time = None
 
     try:
-        comment_entity = models.Comment.get(tag=tag_entity,
-                                            user=user_entity,
-                                            content=comment_content_entity,
-                                            date=comment_date,
-                                            time=comment_time,
-                                            article=article_entity)
+        comment_entity = models.Comment.get(
+            tag=tag_entity,
+            user=user_entity,
+            content=comment_content_entity,
+            date=comment_date,
+            time=comment_time,
+            article=article_entity
+        )
     except:
         import traceback
         traceback.print_exc()

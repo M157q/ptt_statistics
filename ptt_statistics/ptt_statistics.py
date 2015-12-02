@@ -58,8 +58,7 @@ def get_args():
     return args
 
 
-def store_board_info(board_name):
-    # TODO: [#5] from_year and to_year selection
+def store_board_info(board_name, from_year, to_year):
     board = ptt_crawler.Board(board_name, verify=True)
     articles = board.articles()
 
@@ -71,10 +70,19 @@ def store_board_info(board_name):
         controllers.store_board(board)
 
         while True:
-            controllers.store_article(article, board)
-
-            for comment in article.comments:
-                controllers.store_comment(comment, article, board)
+            try:
+                article_year = article.time.date().year
+            except:
+                pass
+            else:
+                if from_year <= article_year <= to_year:
+                    controllers.store_article(article, board)
+                    for comment in article.comments:
+                        controllers.store_comment(comment, article, board)
+                elif article_year < from_year:
+                    break
+                else:
+                    pass
 
             try:
                 article = articles.next()
@@ -133,7 +141,7 @@ def main():
     models.db.generate_mapping(create_tables=True, check_tables=True)
 
     if hasattr(args, 'board_name'):
-        store_board_info(args.board_name)
+        store_board_info(args.board_name, args.from_year, args.to_year)
     if hasattr(args, 'article_path'):
         store_article_info(args.article_path)
     if hasattr(args, 'board_to_show') and hasattr(args, 'date'):
