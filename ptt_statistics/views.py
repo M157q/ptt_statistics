@@ -158,15 +158,6 @@ def show_specific_year_info(data):
         print("")
 
     def show_top_n_data(n=100):
-        '''
-        "total_push_comments_used": "最多「使用」推文",
-        "total_push_comments_gained": "最多「被」推文",
-        "average_push_comments_gained": "平均被推文數",
-        "total_boo_comments_used": "最多「使用」噓文",
-        "total_boo_comments_gained": "最多「被」噓文",
-        "average_boo_comments_gained": "平均被噓文數",
-        '''
-
         def show_top_n_total_articles(n):
             print("")
             print("## 最多發文數 前 {} 名".format(n))
@@ -236,7 +227,86 @@ def show_specific_year_info(data):
             ))
             print("")
 
+        def show_top_n_total_push_comments_gained(n):
+            print("")
+            print("## 最多「被」推文數 前 {} 名".format(n))
+            print("")
+
+            top_n_data = utils.get_n_ranked_data_from_dict(
+                data['top_n']['total_push_comments_gained'],
+                n
+            )
+            len_of_rank = max(
+                map(
+                    utils.get_format_len_of_num,
+                    (t.rank for t in top_n_data)
+                )
+            )
+            len_of_user = max(
+                map(
+                    utils.get_format_len_of_str,
+                    (t.name for t in top_n_data)
+                )
+            )
+            len_of_n_of_push_comments_gained = max(
+                map(
+                    utils.get_format_len_of_num,
+                    (t.value for t in top_n_data)
+                )
+            )
+            s = "|{0:^{1}}|{2:^{3}}|{4:^{5}}|{6:^8}|"
+            print(s.format(
+                "名次",
+                len_of_rank+2,
+                "帳號",
+                len_of_user,
+                "被推文數",
+                len_of_n_of_push_comments_gained+1,
+                "比例"
+            ))
+            s = "|{0:->{1}}|{2:->{3}}|{4:->{5}}|{6:->{7}}|"
+            print(s.format(
+                ':',
+                len_of_rank+len("名次")+2,
+                ':',
+                len_of_user+len("帳號"),
+                ':',
+                len_of_n_of_push_comments_gained+len("被推文數")+1,
+                ':',
+                len("比例")+8
+            ))
+            s = "| {0:>{1},} | {2:>{3}} | {4:>{5},} 則 | ({6:6.2%}) |"
+            for t in top_n_data:
+                print(s.format(
+                    t.rank,
+                    len_of_rank+2,
+                    t.name,
+                    len_of_user,
+                    t.value,
+                    len_of_n_of_push_comments_gained,
+                    t.value/data['comments']['total']
+                ))
+
+            sum_of_top_n_data_values = sum(t.value for t in top_n_data)
+            print("")
+            print("共 {0:>{1},} 則，佔年度留言數 {2:6.2%}".format(
+                sum_of_top_n_data_values,
+                utils.get_format_len_of_num(sum_of_top_n_data_values),
+                sum_of_top_n_data_values/data['comments']['total']
+            ))
+            print("")
+
+        '''
+        "total_push_comments_gained": "最多「被」推文",
+        "average_push_comments_gained": "平均被推文數",
+        "total_boo_comments_gained": "最多「被」噓文",
+        "average_boo_comments_gained": "平均被噓文數",
+        "total_push_comments_used": "最多「使用」推文",
+        "total_boo_comments_used": "最多「使用」噓文",
+        '''
+
         show_top_n_total_articles(n)
+        show_top_n_total_push_comments_gained(n)
 
     show_board_data()
     show_articles_data()
