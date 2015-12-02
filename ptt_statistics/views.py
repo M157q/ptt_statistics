@@ -150,14 +150,15 @@ def show_specific_year_info(data):
     def show_top_n_data(n=100):
         def show_top_n_data_template(
             title=None,
-            n=None,
+            n=100,
             dict_data=None,
             header_of_rank='名次',
             header_of_user='帳號',
             header_of_value=None,
             header_of_percentage='比例',
             count_word_of_value=None,
-            denominator_of_percentage=None
+            denominator_of_percentage=None,
+            name_of_denominator_of_percentage=None
         ):
 
             print("")
@@ -229,7 +230,7 @@ def show_specific_year_info(data):
                 sum_of_top_n_data_values,
                 utils.get_format_len_of_num(sum_of_top_n_data_values),
                 count_word_of_value,
-                header_of_value,
+                name_of_denominator_of_percentage,
                 sum_of_top_n_data_values/denominator_of_percentage
             ))
             print("")
@@ -241,7 +242,8 @@ def show_specific_year_info(data):
                 dict_data=data['top_n']['total_articles'],
                 header_of_value='發文數',
                 count_word_of_value='篇',
-                denominator_of_percentage=data['articles']['total']
+                denominator_of_percentage=data['articles']['total'],
+                name_of_denominator_of_percentage='總文章數'
             )
 
         def show_top_n_total_push_comments_gained(n):
@@ -251,7 +253,19 @@ def show_specific_year_info(data):
                 dict_data=data['top_n']['total_push_comments_gained'],
                 header_of_value='被推文數',
                 count_word_of_value='則',
-                denominator_of_percentage=data['comments']['total']
+                denominator_of_percentage=data['comments']['total'],
+                name_of_denominator_of_percentage='總留言數'
+            )
+
+        def show_top_n_total_boo_comments_gained(n):
+            show_top_n_data_template(
+                title="最多「被」噓文數",
+                n=n,
+                dict_data=data['top_n']['total_boo_comments_gained'],
+                header_of_value='被噓文數',
+                count_word_of_value='則',
+                denominator_of_percentage=data['comments']['total'],
+                name_of_denominator_of_percentage='總留言數'
             )
 
         '''
@@ -265,6 +279,7 @@ def show_specific_year_info(data):
         show_top_n_total_articles(n)
         show_top_n_total_push_comments_gained(n)
         # show_top_n_average_push_comments_gained(n)
+        show_top_n_total_boo_comments_gained(n)
 
     show_board_data()
     show_articles_data()
