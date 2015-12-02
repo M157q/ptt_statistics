@@ -179,39 +179,54 @@ def show_specific_year_info(data):
                 (t.rank for t in top_n_data),
                 'num'
             )
+            format_len_of_data_of_rank = max(
+                len(header_of_rank)*2,
+                format_len_of_rank
+            )
             format_len_of_user = utils.get_format_len_of_container(
                 (t.name for t in top_n_data),
                 'str'
+            )
+            format_len_of_data_of_user = max(
+                len(header_of_user)*2,
+                format_len_of_user
             )
             format_len_of_value = utils.get_format_len_of_container(
                 (t.value for t in top_n_data),
                 'num'
             )
-            header = "|{0:^{1}}|{2:^{3}}|{4:^{5}}|{6:^8}|"
+            format_len_of_data_of_value = max(
+                len(header_of_value)*2,
+                format_len_of_value + 1 + len(count_word_of_value)*2
+                )
+            format_len_of_percentage = 6
+            format_len_of_data_of_percentage = format_len_of_percentage + 2
+            header = "| {0:^{1}} | {2:^{3}} | {4:^{5}} | {6:^{7}} |"
             print(header.format(
                 header_of_rank,
-                format_len_of_rank+2,
+                format_len_of_data_of_rank-len(header_of_rank),
                 header_of_user,
-                format_len_of_user,
+                format_len_of_data_of_user-len(header_of_user),
                 header_of_value,
-                format_len_of_value+2,
-                header_of_percentage
+                format_len_of_data_of_value-len(header_of_value),
+                header_of_percentage,
+                format_len_of_data_of_percentage-len(header_of_percentage)
             ))
             separator = "|{0:->{1}}|{0:->{2}}|{0:->{3}}|{0:->{4}}|"
             print(separator.format(
                 ':',
-                format_len_of_rank+len(header_of_rank)+2,
-                format_len_of_user+len(header_of_user),
-                format_len_of_value+len(header_of_value)+2,
-                len(header_of_percentage)+8
+                format_len_of_data_of_rank + 2,
+                format_len_of_data_of_user + 2,
+                format_len_of_data_of_value + 2,
+                format_len_of_data_of_percentage + 2
             ))
             datum = "| {0:>{1},} | {2:>{3}} | {4:>{5},} {6} | ({7:6.2%}) |"
             for t in top_n_data:
                 print(datum.format(
                     t.rank,
-                    format_len_of_rank+2,
+                    format_len_of_data_of_rank,
                     t.name,
-                    format_len_of_user,
+                    format_len_of_data_of_user,
                     t.value,
                     format_len_of_value,
                     count_word_of_value,
