@@ -62,6 +62,50 @@ def show_articles_specific_year_info(articles):
     print("")
 
 
+def show_comments_specific_year_info(comments):
+    print("")
+    print("## 總留言數")
+    print("")
+    print("共 {:,} 則".format(comments['total']))
+    print("")
+
+    len_of_n_of_comment_tags = utils.get_format_len_of_container(
+        comments['tags'].values(),
+        'num'
+    )
+    print("|{0:^4}|{1:^{2}}|{3:^8}|".format(
+        "",
+        "留言數",
+        len_of_n_of_comment_tags + 2,
+        "比例"
+    ))
+    print("|{0:->{1}}|{2:->{3}}|{4:->{5}}|".format(
+        ':',
+        len("") + 4,
+        ':',
+        len_of_n_of_comment_tags + len("留言數") + 2,
+        ':',
+        len("比例")+8,
+    ))
+    for comment_tag, n_of_comment_tags in sorted(
+        comments['tags'].items(),
+        key=lambda x: x[1],
+        reverse=True,
+    ):
+        print("| {0} | {1:>{2},} 則 | ({3:6.2%}) |".format(
+            comment_tag,
+            n_of_comment_tags,
+            len_of_n_of_comment_tags,
+            n_of_comment_tags/comments['total']))
+    print("")
+
+    print("")
+    print("## 留言帳號總數（未重複）")
+    print("")
+    print("共 {:,} 位".format(comments['total_users']))
+    print("")
+
+
 def show_specific_year_info(data):
     def show_board_data():
         print("")

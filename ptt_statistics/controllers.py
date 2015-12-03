@@ -251,7 +251,6 @@ def get_articles_specific_year_info(board_name, year):
             if article.date.year == year
             and article.board.name == board_name
         )
-
         months = {
             month: orm.count(
                 article
@@ -259,11 +258,7 @@ def get_articles_specific_year_info(board_name, year):
                 if article.date.month == month)
             for month in range(1, 13)
         }
-
-        total_users = orm.count(
-            article.user
-            for article in total_articles
-        )
+        total_users = orm.count(article.user for article in total_articles)
 
         board_year_record_entity.set(
             articles_total=total_articles.count(),
@@ -279,6 +274,68 @@ def get_articles_specific_year_info(board_name, year):
     }
 
     return articles
+
+
+@orm.db_session
+def get_comments_specific_year_info(board_name, year):
+
+    board_entity = models.Board.get(name=board_name)
+
+    if board_entity is None:
+        raise exceptions.NoBoardError(board_name)
+
+    board_year_record_entity = models.BoardYearRecord.get(
+        year=year,
+        board=board_entity
+    )
+
+    if not (
+        board_year_record_entity
+        and board_year_record_entity.update_time > board_entity.update_time
+        and board_year_record_entity.comments_total
+        and board_year_record_entity.comments_tags
+        and board_year_record_entity.comments_total_users
+    ):
+        update_time = datetime.datetime.now()
+
+        if board_year_record_entity is None:
+            board_year_record_entity = models.BoardYearRecord(
+                year=year,
+                board=board_entity,
+                update_time=update_time,
+            )
+
+        total_comments = orm.select(
+            comment
+            for comment in models.Comment
+            if comment.date.year == year
+            and comment.article.board.name == board_name
+        )
+        tag_names = orm.select(tag.name for tag in models.CommentTag)
+        tags = {
+            tag_name: orm.count(
+                comment
+                for comment in total_comments
+                if comment.tag.name == tag_name
+            )
+            for tag_name in tag_names
+        }
+        total_users = orm.count(comment.user for comment in total_comments)
+
+        board_year_record_entity.set(
+            comments_total=total_comments.count(),
+            comments_tags=repr(tags),
+            comments_total_users=total_users,
+            update_time=update_time,
+        )
+
+    comments = {
+        'total': board_year_record_entity.comments_total,
+        'tags': eval(board_year_record_entity.comments_tags),
+        'total_users': board_year_record_entity.comments_total_users,
+    }
+
+    return comments
 
 
 @orm.db_session
