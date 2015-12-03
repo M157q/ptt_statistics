@@ -198,7 +198,7 @@ def get_board_specific_year_info(board_name, year):
 
     board_year_record_entity = models.BoardYearRecord.get(
         year=year,
-        board=board_entity.id
+        board=board_entity
     )
 
     if board_year_record_entity is None:
@@ -215,6 +215,71 @@ def get_board_specific_year_info(board_name, year):
     }
 
     return board
+
+
+@orm.db_session
+def get_articles_specific_year_info(board_name, year):
+
+    board_entity = models.Board.get(name=board_name)
+
+    if board_entity is None:
+        raise exceptions.NoBoardError(board_name)
+
+    board_year_record_entity = models.BoardYearRecord.get(
+        year=year,
+        board=board_entity
+    )
+
+    if not (
+        board_year_record_entity
+        and board_year_record_entity.update_time > board_entity.update_time
+        and board_year_record_entity.articles_total
+        and board_year_record_entity.articles_months
+        and board_year_record_entity.articles_total_users
+    ):
+        update_time = datetime.datetime.now()
+
+        if board_year_record_entity is None:
+            board_year_record_entity = models.BoardYearRecord(
+                year=year,
+                board=board_entity,
+                update_time=update_time,
+            )
+
+        total_articles = orm.select(
+            article for article in models.Article
+            if article.date.year == year
+            and article.board.name == board_name
+        )
+
+        months = {
+            month: orm.count(
+                article
+                for article in total_articles
+                if article.date.month == month)
+            for month in range(1, 13)
+        }
+
+        total_users = orm.count(
+            article.user
+            for article in total_articles
+        )
+
+        board_year_record_entity.set(
+            articles_total=total_articles.count(),
+            articles_months=repr(months),
+            articles_total_users=total_users,
+            update_time=update_time,
+        )
+
+    articles = {
+        'total': board_year_record_entity.articles_total,
+        'months': eval(board_year_record_entity.articles_months),
+        'total_users': board_year_record_entity.articles_total_users,
+    }
+
+    return articles
+
 
 @orm.db_session
 def get_specific_year_info(board_name, year):

@@ -142,7 +142,9 @@ def show_board_info(board_name, date_tuple):
                 .format(board_name)
             )
         else:
-            pass
+            articles_info = controllers.get_articles_specific_year_info(
+                board_name, year)
+            views.show_articles_specific_year_info(articles_info)
 
 
 def main():

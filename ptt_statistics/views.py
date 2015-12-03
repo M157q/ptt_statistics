@@ -21,6 +21,47 @@ def show_board_specific_year_info(board):
     ))
 
 
+def show_articles_specific_year_info(articles):
+    print("")
+    print("## 總文章數")
+    print("")
+    print("共 {:,} 篇".format(articles['total']))
+    print("")
+
+    len_of_n_of_month_articles = utils.get_format_len_of_container(
+        articles['months'].values(),
+        'num'
+    )
+    print("|{0:^5}|{1:^{2}}|{3:^8}|".format(
+        "月份",
+        "文章數",
+        len_of_n_of_month_articles + 2,
+        "比例",
+    ))
+    print("|{0:->{1}}|{2:->{3}}|{4:->{5}}|".format(
+        ':',
+        len("月份") + 5,
+        ':',
+        len_of_n_of_month_articles + len("文章數") + 2,
+        ':',
+        len("比例") + 8,
+    ))
+    for month in sorted(articles['months']):
+        n_of_month_articles = articles['months'][month]
+        print("| {0:>2} 月 | {1:>{2},} 篇 | ({3:6.2%}) |".format(
+            month,
+            n_of_month_articles,
+            len_of_n_of_month_articles,
+            n_of_month_articles/articles['total']))
+    print("")
+
+    print("")
+    print("## 發文帳號總數（未重複）")
+    print("")
+    print("共 {:,} 位".format(articles['total_users']))
+    print("")
+
+
 def show_specific_year_info(data):
     def show_board_data():
         print("")
