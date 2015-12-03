@@ -8,6 +8,7 @@ import requests
 
 from . import constants
 from . import controllers
+from . import exceptions
 from . import models
 from . import utils
 from . import views
@@ -129,9 +130,19 @@ def show_board_info(board_name, date_tuple):
                                                    month=month)
         views.show_specific_month_info(data)
     elif year:
-        data = controllers.get_specific_year_info(board_name,
-                                                  year=year)
-        views.show_specific_year_info(data)
+        try:
+            board_info = controllers.get_board_specific_year_info(
+                board_name, year)
+            views.show_board_specific_year_info(board_info)
+        except exceptions.NoBoardError:
+            sys.exit(
+                ("Board: {} not found in database."
+                 "\n"
+                 "Please crawl the board first.")
+                .format(board_name)
+            )
+        else:
+            pass
 
 
 def main():

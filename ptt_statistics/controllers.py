@@ -1,5 +1,6 @@
-import re
 import datetime
+import re
+import sys
 from collections import defaultdict
 from pprint import pprint
 
@@ -188,7 +189,35 @@ def get_specific_month_info(board_name, **kargs):
 
 
 @orm.db_session
-def get_specific_year_info(board_name, **kargs):
+def get_board_specific_year_info(board_name, year):
+
+    board_entity = models.Board.get(name=board_name)
+
+    if board_entity is None:
+        raise exceptions.NoBoardError(board_name)
+
+    board_year_record_entity = models.BoardYearRecord.get(
+        year=year,
+        board=board_entity.id
+    )
+
+    if board_year_record_entity is None:
+        board_year_record_entity = models.BoardYearRecord(
+            year=year,
+            board=board_entity,
+            update_time=datetime.datetime.now(),
+        )
+
+    board = {
+        'name': board_year_record_entity.board.name,
+        'year': board_year_record_entity.year,
+        'update_time': board_year_record_entity.board.update_time,
+    }
+
+    return board
+
+@orm.db_session
+def get_specific_year_info(board_name, year):
 
     board_entity = models.Board.get(name=board_name)
 

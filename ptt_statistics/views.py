@@ -9,6 +9,18 @@ def show_specific_month_info(data):
     pass
 
 
+def show_board_specific_year_info(board):
+    print("")
+    print("# {} 版 {} 年統計資料".format(
+        board['name'],
+        board['year'],
+    ))
+    print("")
+    print("資料最後更新時間：{}".format(
+        board['update_time'].strftime("%Y-%m-%d %H:%M:%S")
+    ))
+
+
 def show_specific_year_info(data):
     def show_board_data():
         print("")
