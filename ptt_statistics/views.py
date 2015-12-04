@@ -1,4 +1,5 @@
 from . import utils
+from . import controllers
 
 
 def show_specific_day_info(data):
@@ -9,7 +10,9 @@ def show_specific_month_info(data):
     pass
 
 
-def show_board_specific_year_info(board):
+def show_board_specific_year_info(board_name, year):
+    board = controllers.get_board_specific_year_info(board_name, year)
+
     print("")
     print("# {} 版 {} 年統計資料".format(
         board['name'],
@@ -21,7 +24,9 @@ def show_board_specific_year_info(board):
     ))
 
 
-def show_articles_specific_year_info(articles):
+def show_articles_specific_year_info(board_name, year):
+    articles = controllers.get_articles_specific_year_info(board_name, year)
+
     print("")
     print("## 總文章數")
     print("")
@@ -61,8 +66,12 @@ def show_articles_specific_year_info(articles):
     print("共 {:,} 位".format(articles['total_users']))
     print("")
 
+    return articles['total_users']
 
-def show_comments_specific_year_info(comments):
+
+def show_comments_specific_year_info(board_name, year):
+    comments = controllers.get_comments_specific_year_info(board_name, year)
+
     print("")
     print("## 總留言數")
     print("")
@@ -105,49 +114,63 @@ def show_comments_specific_year_info(comments):
     print("共 {:,} 位".format(comments['total_users']))
     print("")
 
+    return comments['total_users']
 
-def show_users_specific_year_info(users):
-        print("")
-        print("## 有發文或留言的帳號總數（未重複）")
-        print("")
-        print("共 {:,} 位".format(users['total']))
-        print("")
 
-        format_len_of_user_type = utils.get_format_len_of_container(
-            users['comment_or_post'].keys(),
-            'str'
-        )
-        format_len_of_n_of_user_type = utils.get_format_len_of_container(
-            users['comment_or_post'].values(),
-            'num'
-        )
-        print("|{0:{fill}^{1}}|{2:^{3}}|{4:^8}|".format(
-            "類型",
-            format_len_of_user_type + 1,
-            "人數",
-            format_len_of_n_of_user_type + 3,
-            "比例",
-            fill='　'  # Use fullwidth space for Chinese character
-        ))
-        print("|{0:->{1}}|{0:->{2}}|{0:->{3}}|".format(
-            ':',
-            format_len_of_user_type*2 + 2,
-            format_len_of_n_of_user_type + len("人數") + 3,
-            len("比例") + 8,
-        ))
-        for user_type, n_of_user_type in sorted(
-            users['comment_or_post'].items(),
-            key=lambda x: x[1],
-            reverse=True
-        ):
-            print("| {0:{fill}<{1}} | {2:>{3},} 位 | ({4:6.2%}) |".format(
-                user_type,
-                format_len_of_user_type,
-                n_of_user_type,
-                format_len_of_n_of_user_type,
-                n_of_user_type/users['total'],
-                fill='　'))  # Use fullwidth space for Chinese character
-        print("")
+def show_users_specific_year_info(
+    board_name,
+    year,
+    articles_total_users,
+    comments_total_users
+):
+
+    users = controllers.get_users_specific_year_info(
+        board_name, year,
+        articles_total_users,
+        comments_total_users,
+    )
+
+    print("")
+    print("## 有發文或留言的帳號總數（未重複）")
+    print("")
+    print("共 {:,} 位".format(users['total']))
+    print("")
+
+    format_len_of_user_type = utils.get_format_len_of_container(
+        users['comment_or_post'].keys(),
+        'str'
+    )
+    format_len_of_n_of_user_type = utils.get_format_len_of_container(
+        users['comment_or_post'].values(),
+        'num'
+    )
+    print("|{0:{fill}^{1}}|{2:^{3}}|{4:^8}|".format(
+        "類型",
+        format_len_of_user_type + 1,
+        "人數",
+        format_len_of_n_of_user_type + 3,
+        "比例",
+        fill='　'  # Use fullwidth space for Chinese character
+    ))
+    print("|{0:->{1}}|{0:->{2}}|{0:->{3}}|".format(
+        ':',
+        format_len_of_user_type*2 + 2,
+        format_len_of_n_of_user_type + len("人數") + 3,
+        len("比例") + 8,
+    ))
+    for user_type, n_of_user_type in sorted(
+        users['comment_or_post'].items(),
+        key=lambda x: x[1],
+        reverse=True
+    ):
+        print("| {0:{fill}<{1}} | {2:>{3},} 位 | ({4:6.2%}) |".format(
+            user_type,
+            format_len_of_user_type,
+            n_of_user_type,
+            format_len_of_n_of_user_type,
+            n_of_user_type/users['total'],
+            fill='　'))  # Use fullwidth space for Chinese character
+    print("")
 
 
 def show_specific_year_info(data):

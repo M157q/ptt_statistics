@@ -131,9 +131,7 @@ def show_board_info(board_name, date_tuple):
         views.show_specific_month_info(data)
     elif year:
         try:
-            board_info = controllers.get_board_specific_year_info(
-                board_name, year)
-            views.show_board_specific_year_info(board_info)
+            views.show_board_specific_year_info(board_name, year)
         except exceptions.NoBoardError:
             sys.exit(
                 ("Board: {} not found in database."
@@ -142,20 +140,22 @@ def show_board_info(board_name, date_tuple):
                 .format(board_name)
             )
         else:
-            articles_info = controllers.get_articles_specific_year_info(
-                board_name, year)
-            views.show_articles_specific_year_info(articles_info)
-
-            comments_info = controllers.get_comments_specific_year_info(
-                board_name, year)
-            views.show_comments_specific_year_info(comments_info)
-
-            users_info = controllers.get_users_specific_year_info(
-                board_name, year,
-                articles_info['total_users'],
-                comments_info['total_users'],
+            articles_total_users = views.show_articles_specific_year_info(
+                board_name,
+                year
             )
-            views.show_users_specific_year_info(users_info)
+
+            comments_total_users = views.show_comments_specific_year_info(
+                board_name,
+                year
+            )
+
+            views.show_users_specific_year_info(
+                board_name,
+                year,
+                articles_total_users,
+                comments_total_users
+            )
 
 
 def main():

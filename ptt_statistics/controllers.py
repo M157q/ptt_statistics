@@ -1,6 +1,5 @@
 import datetime
 import re
-import sys
 from collections import defaultdict
 from pprint import pprint
 
@@ -339,7 +338,9 @@ def get_comments_specific_year_info(board_name, year):
 
 
 @orm.db_session
-def get_users_specific_year_info(board_name, year,
+def get_users_specific_year_info(
+    board_name,
+    year,
     articles_total_users,
     comments_total_users,
 ):
@@ -370,6 +371,11 @@ def get_users_specific_year_info(board_name, year,
             )
 
         comment_or_post = {}
+        total_articles = orm.select(
+            article for article in models.Article
+            if article.date.year == year
+            and article.board.name == board_name
+        )
         comment_or_post['發文且留言'] = orm.count(
             article.user
             for article in total_articles
@@ -381,7 +387,7 @@ def get_users_specific_year_info(board_name, year,
             comments_total_users - comment_or_post['發文且留言']
         )
         comment_or_post['只發文'] = (
-            articles['total_users'] - comment_or_post['發文且留言']
+            articles_total_users - comment_or_post['發文且留言']
         )
 
         total = (
@@ -407,7 +413,7 @@ def get_users_specific_year_info(board_name, year,
 
 
 @orm.db_session
-def get_specific_year_info(board_name, year):
+def get_specific_year_info(board_name, **kargs):
 
     board_entity = models.Board.get(name=board_name)
 
@@ -581,7 +587,7 @@ def get_specific_year_info(board_name, year):
                     top_n['total_push_comments_used']
                 ).replace("<class 'int'>", "int"),
                 top_n_total_boo_comments_used=repr(
-                     top_n['total_boo_comments_used']
+                    top_n['total_boo_comments_used']
                 ).replace("<class 'int'>", "int"),
             )
         else:
