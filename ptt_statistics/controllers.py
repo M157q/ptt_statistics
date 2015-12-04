@@ -250,18 +250,26 @@ def get_articles_specific_year_info(board_name, year):
             if article.date.year == year
             and article.board.name == board_name
         )
-        months = {
-            month: orm.count(
-                article
-                for article in year_articles
-                if article.date.month == month)
-            for month in range(1, 13)
-        }
-        total_users = orm.count(article.user for article in year_articles)
+
+        months = defaultdict(int)
+        for month in orm.select(
+            article.date.month
+            for article in models.Article
+            if article.date.year == year
+            and article.board.name == board_name
+        ).without_distinct():
+            months[month] += 1
+
+        total_users = orm.select(
+            article.user
+            for article in models.Article
+            if article.date.year == year
+            and article.board.name == board_name
+        ).count()
 
         board_year_record_entity.set(
             articles_total=year_articles.count(),
-            articles_months=repr(months),
+            articles_months=repr(months).replace("<class 'int'>", "int"),
             articles_total_users=total_users,
             update_time=update_time,
         )
