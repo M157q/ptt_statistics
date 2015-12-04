@@ -51,9 +51,14 @@ def get_format_len_of_num(n):
 
 def get_format_len_of_container(container, format_type):
     if format_type == 'str':
-        return max(map(get_format_len_of_str, (e for e in container)))
+        format_lens = map(get_format_len_of_str, (e for e in container))
     if format_type == 'num':
-        return max(map(get_format_len_of_num, (e for e in container)))
+        format_lens = map(get_format_len_of_num, (e for e in container))
+
+    try:
+        return max(format_lens)
+    except:
+        return 0
 
 
 def get_n_ranked_data_from_dict(original_dict, n=100):
