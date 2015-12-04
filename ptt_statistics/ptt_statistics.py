@@ -150,6 +150,13 @@ def show_board_info(board_name, date_tuple):
                 board_name, year)
             views.show_comments_specific_year_info(comments_info)
 
+            users_info = controllers.get_users_specific_year_info(
+                board_name, year,
+                articles_info['total_users'],
+                comments_info['total_users'],
+            )
+            views.show_users_specific_year_info(users_info)
+
 
 def main():
     args = get_args()

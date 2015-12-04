@@ -339,6 +339,74 @@ def get_comments_specific_year_info(board_name, year):
 
 
 @orm.db_session
+def get_users_specific_year_info(board_name, year,
+    articles_total_users,
+    comments_total_users,
+):
+
+    board_entity = models.Board.get(name=board_name)
+
+    if board_entity is None:
+        raise exceptions.NoBoardError(board_name)
+
+    board_year_record_entity = models.BoardYearRecord.get(
+        year=year,
+        board=board_entity
+    )
+
+    if not (
+        board_year_record_entity
+        and board_year_record_entity.update_time > board_entity.update_time
+        and board_year_record_entity.users_total
+        and board_year_record_entity.users_comment_or_post
+    ):
+        update_time = datetime.datetime.now()
+
+        if board_year_record_entity is None:
+            board_year_record_entity = models.BoardYearRecord(
+                year=year,
+                board=board_entity,
+                update_time=update_time,
+            )
+
+        comment_or_post = {}
+        comment_or_post['發文且留言'] = orm.count(
+            article.user
+            for article in total_articles
+            if article.user.comments.select(
+                lambda c: c.date.year == year
+            )
+        )
+        comment_or_post['只留言'] = (
+            comments_total_users - comment_or_post['發文且留言']
+        )
+        comment_or_post['只發文'] = (
+            articles['total_users'] - comment_or_post['發文且留言']
+        )
+
+        total = (
+            articles_total_users
+            + comments_total_users
+            - comment_or_post['發文且留言']
+        )
+
+        board_year_record_entity.set(
+            users_total=total,
+            users_comment_or_post=repr(comment_or_post),
+            update_time=update_time,
+        )
+
+    users = {
+        'total': board_year_record_entity.users_total,
+        'comment_or_post': eval(
+            board_year_record_entity.users_comment_or_post
+        ),
+    }
+
+    return users
+
+
+@orm.db_session
 def get_specific_year_info(board_name, year):
 
     board_entity = models.Board.get(name=board_name)
