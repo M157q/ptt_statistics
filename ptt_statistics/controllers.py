@@ -304,26 +304,32 @@ def get_comments_specific_year_info(board_name, year):
                 update_time=update_time,
             )
 
-        year_comments = orm.select(
+        tags = defaultdict(int)
+        for tag_name in orm.select(
+            comment.tag.name
+            for comment in models.Comment
+            if comment.date.year == year
+            and comment.article.board.name == board_name
+        ).without_distinct():
+            tags[tag_name] += 1
+
+        total_users = orm.select(
+            comment.user
+            for comment in models.Comment
+            if comment.date.year == year
+            and comment.article.board.name == board_name
+        ).count()
+
+        total = orm.select(
             comment
             for comment in models.Comment
             if comment.date.year == year
             and comment.article.board.name == board_name
-        )
-        tag_names = orm.select(tag.name for tag in models.CommentTag)
-        tags = {
-            tag_name: orm.count(
-                comment
-                for comment in year_comments
-                if comment.tag.name == tag_name
-            )
-            for tag_name in tag_names
-        }
-        total_users = orm.count(comment.user for comment in year_comments)
+        ).count()
 
         board_year_record_entity.set(
-            comments_total=year_comments.count(),
-            comments_tags=repr(tags),
+            comments_total=total,
+            comments_tags=repr(tags).replace("<class 'int'>", "int"),
             comments_total_users=total_users,
             update_time=update_time,
         )
