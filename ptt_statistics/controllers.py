@@ -413,7 +413,7 @@ def get_users_specific_year_info(
 
 
 @orm.db_session
-def get_top_n_total_articles_specific_year_info(
+def get_top_n_total_articles_and_comments_gained_specific_year_info(
     board_name,
     year,
 ):
@@ -434,8 +434,6 @@ def get_top_n_total_articles_specific_year_info(
         and board_year_record_entity.top_n_total_articles
         and board_year_record_entity.top_n_total_push_comments_gained
         and board_year_record_entity.top_n_total_boo_comments_gained
-        and board_year_record_entity.top_n_total_push_comments_used
-        and board_year_record_entity.top_n_total_boo_comments_used
     ):
         update_time = datetime.datetime.now()
 
@@ -465,20 +463,6 @@ def get_top_n_total_articles_specific_year_info(
                 if comment.tag.name == '噓':
                     total_boo_comments_gained[author] += 1
 
-        total_push_comments_used = defaultdict(int)
-        total_boo_comments_used = defaultdict(int)
-        year_comments = orm.select(
-            comment
-            for comment in models.Comment
-            if comment.date.year == year
-            and comment.article.board.name == board_name
-        )
-        for comment in year_comments:
-            if comment.tag.name == '推':
-                total_push_comments_used[comment.user.identifier] += 1
-            if comment.tag.name == '噓':
-                total_boo_comments_used[comment.user.identifier] += 1
-
         board_year_record_entity.set(
             top_n_total_articles=repr(
                 total_articles
@@ -489,38 +473,25 @@ def get_top_n_total_articles_specific_year_info(
             top_n_total_boo_comments_gained=repr(
                 total_boo_comments_gained
             ).replace("<class 'int'>", "int"),
-            top_n_total_push_comments_used=repr(
-                total_push_comments_used
-            ).replace("<class 'int'>", "int"),
-            top_n_total_boo_comments_used=repr(
-                total_boo_comments_used
-            ).replace("<class 'int'>", "int"),
         )
-    orm.show(board_year_record_entity)
 
-    top_n = {
-        'total_articles': eval(
-            board_year_record_entity.top_n_total_articles
-        ),
-        'total_push_comments_gained': eval(
-            board_year_record_entity.top_n_total_push_comments_gained
-        ),
-        'total_boo_comments_gained': eval(
-            board_year_record_entity.top_n_total_boo_comments_gained
-        ),
-        'total_push_comments_used': eval(
-            board_year_record_entity.top_n_total_push_comments_used
-        ),
-        'total_boo_comments_used': eval(
-            board_year_record_entity.top_n_total_boo_comments_used
-        ),
-    }
+    total_articles = eval(
+        board_year_record_entity.top_n_total_articles
+    )
+    total_push_comments_gained = eval(
+        board_year_record_entity.top_n_total_push_comments_gained
+    )
+    total_boo_comments_gained = eval(
+        board_year_record_entity.top_n_total_boo_comments_gained
+    )
 
-    return top_n
+    return (
+        total_articles, total_push_comments_gained, total_boo_comments_gained
+    )
 
 
 @orm.db_session
-def get_top_n_specific_year_info(
+def get_top_n_total_comments_used_specific_year_info(
     board_name,
     year,
 ):
@@ -538,9 +509,6 @@ def get_top_n_specific_year_info(
     if not (
         board_year_record_entity
         and board_year_record_entity.update_time > board_entity.update_time
-        and board_year_record_entity.top_n_total_articles
-        and board_year_record_entity.top_n_total_push_comments_gained
-        and board_year_record_entity.top_n_total_boo_comments_gained
         and board_year_record_entity.top_n_total_push_comments_used
         and board_year_record_entity.top_n_total_boo_comments_used
     ):
@@ -552,25 +520,6 @@ def get_top_n_specific_year_info(
                 board=board_entity,
                 update_time=update_time,
             )
-
-        total_articles = defaultdict(int)
-        total_push_comments_gained = defaultdict(int)
-        total_boo_comments_gained = defaultdict(int)
-
-        year_articles = orm.select(
-            article for article in models.Article
-            if article.date.year == year
-            and article.board.name == board_name
-        )
-        for article in year_articles:
-            author = article.user.identifier
-            total_articles[author] += 1
-
-            for comment in article.comments:
-                if comment.tag.name == '推':
-                    total_push_comments_gained[author] += 1
-                if comment.tag.name == '噓':
-                    total_boo_comments_gained[author] += 1
 
         total_push_comments_used = defaultdict(int)
         total_boo_comments_used = defaultdict(int)
@@ -587,15 +536,6 @@ def get_top_n_specific_year_info(
                 total_boo_comments_used[comment.user.identifier] += 1
 
         board_year_record_entity.set(
-            top_n_total_articles=repr(
-                total_articles
-            ).replace("<class 'int'>", "int"),
-            top_n_total_push_comments_gained=repr(
-                total_push_comments_gained
-            ).replace("<class 'int'>", "int"),
-            top_n_total_boo_comments_gained=repr(
-                total_boo_comments_gained
-            ).replace("<class 'int'>", "int"),
             top_n_total_push_comments_used=repr(
                 total_push_comments_used
             ).replace("<class 'int'>", "int"),
@@ -604,22 +544,11 @@ def get_top_n_specific_year_info(
             ).replace("<class 'int'>", "int"),
         )
 
-    top_n = {
-        'total_articles': eval(
-            board_year_record_entity.top_n_total_articles
-        ),
-        'total_push_comments_gained': eval(
-            board_year_record_entity.top_n_total_push_comments_gained
-        ),
-        'total_boo_comments_gained': eval(
-            board_year_record_entity.top_n_total_boo_comments_gained
-        ),
-        'total_push_comments_used': eval(
-            board_year_record_entity.top_n_total_push_comments_used
-        ),
-        'total_boo_comments_used': eval(
-            board_year_record_entity.top_n_total_boo_comments_used
-        ),
-    }
+    total_push_comments_used = eval(
+        board_year_record_entity.top_n_total_push_comments_used
+    )
+    total_boo_comments_used = eval(
+        board_year_record_entity.top_n_total_boo_comments_used
+    )
 
-    return top_n
+    return (total_push_comments_used, total_boo_comments_used)

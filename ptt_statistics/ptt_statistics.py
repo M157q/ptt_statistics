@@ -164,6 +164,7 @@ def show_board_info(board_name, date_tuple):
                 year,
                 articles_total,
                 comments_total,
+                n=100,
             )
 
 
