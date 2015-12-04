@@ -499,6 +499,7 @@ def show_top_n_average_boo_comments_gained(
         denominator_threshold=total_articles_threshold,
     )
 
+
 def show_top_n_specific_year_info(
     board_name,
     year,
@@ -522,9 +523,9 @@ def show_top_n_specific_year_info(
         total_articles,
         year_total_articles,
     )
-    total_articles_threshold = total_articles_threshold - 5
-                               if total_articles_threshold > 4
-                               else 0
+    total_articles_threshold -= 5
+    if total_articles_threshold < 0:
+        total_articles_threshold = 0
 
     show_top_n_total_push_comments_gained(
         n,
