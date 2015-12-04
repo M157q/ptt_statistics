@@ -377,21 +377,23 @@ def get_users_specific_year_info(
             )
 
         comment_or_post = {}
-        year_articles = orm.select(
-            article for article in models.Article
+
+        comment_or_post['發文且留言'] = orm.select(
+            article.user
+            for article in models.Article
             if article.date.year == year
             and article.board.name == board_name
-        )
-        comment_or_post['發文且留言'] = orm.count(
-            article.user
-            for article in year_articles
-            if article.user.comments.select(
-                lambda c: c.date.year == year
+            and orm.exists(
+                comment
+                for comment in article.user.comments
+                if comment.date.year == year
             )
-        )
+        ).count()
+
         comment_or_post['只留言'] = (
             comments_total_users - comment_or_post['發文且留言']
         )
+
         comment_or_post['只發文'] = (
             articles_total_users - comment_or_post['發文且留言']
         )
