@@ -140,21 +140,30 @@ def show_board_info(board_name, date_tuple):
                 .format(board_name)
             )
         else:
-            articles_total_users = views.show_articles_specific_year_info(
-                board_name,
-                year
-            )
+            articles_total, articles_total_users = \
+                views.show_articles_specific_year_info(
+                    board_name,
+                    year
+                )
 
-            comments_total_users = views.show_comments_specific_year_info(
-                board_name,
-                year
-            )
+            comments_total, comments_total_users = \
+                views.show_comments_specific_year_info(
+                    board_name,
+                    year
+                )
 
             views.show_users_specific_year_info(
                 board_name,
                 year,
                 articles_total_users,
                 comments_total_users
+            )
+
+            views.show_top_n_specific_year_info(
+                board_name,
+                year,
+                articles_total,
+                comments_total,
             )
 
 

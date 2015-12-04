@@ -66,7 +66,7 @@ def show_articles_specific_year_info(board_name, year):
     print("共 {:,} 位".format(articles['total_users']))
     print("")
 
-    return articles['total_users']
+    return articles['total'], articles['total_users']
 
 
 def show_comments_specific_year_info(board_name, year):
@@ -114,7 +114,7 @@ def show_comments_specific_year_info(board_name, year):
     print("共 {:,} 位".format(comments['total_users']))
     print("")
 
-    return comments['total_users']
+    return comments['total'], comments['total_users']
 
 
 def show_users_specific_year_info(
@@ -173,144 +173,12 @@ def show_users_specific_year_info(
     print("")
 
 
-def show_specific_year_info(data):
-    def show_board_data():
-        print("")
-        print("# {} 版 {} 年統計資料".format(
-            data['board']['name'],
-            data['board']['year'],
-        ))
-        print("")
-        print("資料最後更新時間：{}".format(
-            data['board']['update_time'].strftime("%Y-%m-%d %H:%M:%S")
-        ))
-
-    def show_articles_data():
-        print("")
-        print("## 總文章數")
-        print("")
-        print("共 {:,} 篇".format(data['articles']['total']))
-        print("")
-
-        len_of_n_of_month_articles = utils.get_format_len_of_container(
-            data['articles']['months'].values(),
-            'num'
-        )
-        print("|{0:^5}|{1:^{2}}|{3:^8}|".format(
-            "月份",
-            "文章數",
-            len_of_n_of_month_articles + 2,
-            "比例",
-        ))
-        print("|{0:->{1}}|{2:->{3}}|{4:->{5}}|".format(
-            ':',
-            len("月份") + 5,
-            ':',
-            len_of_n_of_month_articles + len("文章數") + 2,
-            ':',
-            len("比例") + 8,
-        ))
-        for month in sorted(data['articles']['months']):
-            n_of_month_articles = data['articles']['months'][month]
-            print("| {0:>2} 月 | {1:>{2},} 篇 | ({3:6.2%}) |".format(
-                month,
-                n_of_month_articles,
-                len_of_n_of_month_articles,
-                n_of_month_articles/data['articles']['total']))
-        print("")
-
-        print("")
-        print("## 發文帳號總數（未重複）")
-        print("")
-        print("共 {:,} 位".format(data['articles']['total_users']))
-        print("")
-
-    def show_comments_data():
-        print("")
-        print("## 總留言數")
-        print("")
-        print("共 {:,} 則".format(data['comments']['total']))
-        print("")
-
-        len_of_n_of_comment_tags = utils.get_format_len_of_container(
-            data['comments']['tags'].values(),
-            'num'
-        )
-        print("|{0:^4}|{1:^{2}}|{3:^8}|".format(
-            "",
-            "留言數",
-            len_of_n_of_comment_tags + 2,
-            "比例"
-        ))
-        print("|{0:->{1}}|{2:->{3}}|{4:->{5}}|".format(
-            ':',
-            len("") + 4,
-            ':',
-            len_of_n_of_comment_tags + len("留言數") + 2,
-            ':',
-            len("比例")+8,
-        ))
-        for comment_tag, n_of_comment_tags in sorted(
-            data['comments']['tags'].items(),
-            key=lambda x: x[1],
-            reverse=True,
-        ):
-            print("| {0} | {1:>{2},} 則 | ({3:6.2%}) |".format(
-                comment_tag,
-                n_of_comment_tags,
-                len_of_n_of_comment_tags,
-                n_of_comment_tags/data['comments']['total']))
-        print("")
-
-        print("")
-        print("## 留言帳號總數（未重複）")
-        print("")
-        print("共 {:,} 位".format(data['comments']['total_users']))
-        print("")
-
-    def show_users_data():
-        print("")
-        print("## 有發文或留言的帳號總數（未重複）")
-        print("")
-        print("共 {:,} 位".format(data['users']['total']))
-        print("")
-
-        format_len_of_user_type = utils.get_format_len_of_container(
-            data['users']['comment_or_post'].keys(),
-            'str'
-        )
-        format_len_of_n_of_user_type = utils.get_format_len_of_container(
-            data['users']['comment_or_post'].values(),
-            'num'
-        )
-        print("|{0:{fill}^{1}}|{2:^{3}}|{4:^8}|".format(
-            "類型",
-            format_len_of_user_type + 1,
-            "人數",
-            format_len_of_n_of_user_type + 3,
-            "比例",
-            fill='　'  # Use fullwidth space for Chinese character
-        ))
-        print("|{0:->{1}}|{0:->{2}}|{0:->{3}}|".format(
-            ':',
-            format_len_of_user_type*2 + 2,
-            format_len_of_n_of_user_type + len("人數") + 3,
-            len("比例") + 8,
-        ))
-        for user_type, n_of_user_type in sorted(
-            data['users']['comment_or_post'].items(),
-            key=lambda x: x[1],
-            reverse=True
-        ):
-            print("| {0:{fill}<{1}} | {2:>{3},} 位 | ({4:6.2%}) |".format(
-                user_type,
-                format_len_of_user_type,
-                n_of_user_type,
-                format_len_of_n_of_user_type,
-                n_of_user_type/data['users']['total'],
-                fill='　'))  # Use fullwidth space for Chinese character
-        print("")
-
+def show_top_n_specific_year_info(
+    board_name,
+    year,
+    articles_total,
+    comments_total,
+):
     def show_top_n_data(n=100):
         def show_top_n_data_template(
             show_type=None,
@@ -485,7 +353,7 @@ def show_specific_year_info(data):
                     ))
 
                 print("")
-                print("僅顯示{}到達 {} 以上的資料".format(
+                print("僅計算{}到達 {} 以上的使用者".format(
                     header_of_denominator,
                     denominator_threshold,
                 ))
@@ -496,10 +364,10 @@ def show_specific_year_info(data):
                 show_type='total',
                 title="最多發文數",
                 n=n,
-                data_dict=data['top_n']['total_articles'],
+                data_dict=top_n['total_articles'],
                 header_of_value='發文數',
                 count_word_of_value='篇',
-                denominator_of_percentage=data['articles']['total'],
+                denominator_of_percentage=articles_total,
                 name_of_denominator_of_percentage='總文章數'
             )
 
@@ -510,10 +378,10 @@ def show_specific_year_info(data):
                 show_type='total',
                 title="最多「被」推文數",
                 n=n,
-                data_dict=data['top_n']['total_push_comments_gained'],
+                data_dict=top_n['total_push_comments_gained'],
                 header_of_value='被推文數',
                 count_word_of_value='則',
-                denominator_of_percentage=data['comments']['total'],
+                denominator_of_percentage=comments_total,
                 name_of_denominator_of_percentage='總留言數'
             )
 
@@ -522,10 +390,10 @@ def show_specific_year_info(data):
                 show_type='total',
                 title="最多「被」噓文數",
                 n=n,
-                data_dict=data['top_n']['total_boo_comments_gained'],
+                data_dict=top_n['total_boo_comments_gained'],
                 header_of_value='被噓文數',
                 count_word_of_value='則',
-                denominator_of_percentage=data['comments']['total'],
+                denominator_of_percentage=comments_total,
                 name_of_denominator_of_percentage='總留言數'
             )
 
@@ -534,10 +402,10 @@ def show_specific_year_info(data):
                 show_type='total',
                 title="最多「使用」推文數",
                 n=n,
-                data_dict=data['top_n']['total_push_comments_used'],
+                data_dict=top_n['total_push_comments_used'],
                 header_of_value='推文使用量',
                 count_word_of_value='則',
-                denominator_of_percentage=data['comments']['total'],
+                denominator_of_percentage=comments_total,
                 name_of_denominator_of_percentage='總留言數'
             )
 
@@ -546,10 +414,10 @@ def show_specific_year_info(data):
                 show_type='total',
                 title="最多「使用」噓文數",
                 n=n,
-                data_dict=data['top_n']['total_boo_comments_used'],
+                data_dict=top_n['total_boo_comments_used'],
                 header_of_value='噓文使用量',
                 count_word_of_value='則',
-                denominator_of_percentage=data['comments']['total'],
+                denominator_of_percentage=comments_total,
                 name_of_denominator_of_percentage='總留言數'
             )
 
@@ -564,21 +432,21 @@ def show_specific_year_info(data):
                 data_dict={
                     user: (
                         round((
-                            data['top_n']['total_push_comments_gained'][user]
-                            / data['top_n']['total_articles'][user]),
+                            top_n['total_push_comments_gained'][user]
+                            / top_n['total_articles'][user]),
                             2
                         )
                     )
                     for user, total_articles
-                    in data['top_n']['total_articles'].items()
+                    in top_n['total_articles'].items()
                     if total_articles >= total_articles_threshold
                 },
                 header_of_value='推文比',
                 count_word_of_value='則／篇',
                 header_of_numerator='被推文數（則）',
                 header_of_denominator='總發文數（篇）',
-                numerator_dict=data['top_n']['total_push_comments_gained'],
-                denominator_dict=data['top_n']['total_articles'],
+                numerator_dict=top_n['total_push_comments_gained'],
+                denominator_dict=top_n['total_articles'],
                 denominator_threshold=total_articles_threshold,
             )
 
@@ -593,28 +461,23 @@ def show_specific_year_info(data):
                 data_dict={
                     user: (
                         round((
-                            data['top_n']['total_boo_comments_gained'][user]
-                            / data['top_n']['total_articles'][user]),
+                            top_n['total_boo_comments_gained'][user]
+                            / top_n['total_articles'][user]),
                             2
                         )
                     )
                     for user, total_articles
-                    in data['top_n']['total_articles'].items()
+                    in top_n['total_articles'].items()
                     if total_articles >= total_articles_threshold
                 },
                 header_of_value='噓文比',
                 count_word_of_value='則／篇',
                 header_of_numerator='被噓文數（則）',
                 header_of_denominator='總發文數（篇）',
-                numerator_dict=data['top_n']['total_boo_comments_gained'],
-                denominator_dict=data['top_n']['total_articles'],
+                numerator_dict=top_n['total_boo_comments_gained'],
+                denominator_dict=top_n['total_articles'],
                 denominator_threshold=total_articles_threshold,
             )
-
-        '''
-        "average_push_comments_gained": "平均被推文數",
-        "average_boo_comments_gained": "平均被噓文數",
-        '''
 
         total_articles_threshold = show_top_n_total_articles(n) - 5
         show_top_n_total_push_comments_gained(n)
@@ -624,8 +487,5 @@ def show_specific_year_info(data):
         show_top_n_total_push_comments_used(n)
         show_top_n_total_boo_comments_used(n)
 
-    show_board_data()
-    show_articles_data()
-    show_comments_data()
-    show_users_data()
+    top_n = controllers.get_top_n_specific_year_info(board_name, year)
     show_top_n_data(n=100)

@@ -245,7 +245,7 @@ def get_articles_specific_year_info(board_name, year):
                 update_time=update_time,
             )
 
-        total_articles = orm.select(
+        year_articles = orm.select(
             article for article in models.Article
             if article.date.year == year
             and article.board.name == board_name
@@ -253,14 +253,14 @@ def get_articles_specific_year_info(board_name, year):
         months = {
             month: orm.count(
                 article
-                for article in total_articles
+                for article in year_articles
                 if article.date.month == month)
             for month in range(1, 13)
         }
-        total_users = orm.count(article.user for article in total_articles)
+        total_users = orm.count(article.user for article in year_articles)
 
         board_year_record_entity.set(
-            articles_total=total_articles.count(),
+            articles_total=year_articles.count(),
             articles_months=repr(months),
             articles_total_users=total_users,
             update_time=update_time,
@@ -304,7 +304,7 @@ def get_comments_specific_year_info(board_name, year):
                 update_time=update_time,
             )
 
-        total_comments = orm.select(
+        year_comments = orm.select(
             comment
             for comment in models.Comment
             if comment.date.year == year
@@ -314,15 +314,15 @@ def get_comments_specific_year_info(board_name, year):
         tags = {
             tag_name: orm.count(
                 comment
-                for comment in total_comments
+                for comment in year_comments
                 if comment.tag.name == tag_name
             )
             for tag_name in tag_names
         }
-        total_users = orm.count(comment.user for comment in total_comments)
+        total_users = orm.count(comment.user for comment in year_comments)
 
         board_year_record_entity.set(
-            comments_total=total_comments.count(),
+            comments_total=year_comments.count(),
             comments_tags=repr(tags),
             comments_total_users=total_users,
             update_time=update_time,
@@ -371,14 +371,14 @@ def get_users_specific_year_info(
             )
 
         comment_or_post = {}
-        total_articles = orm.select(
+        year_articles = orm.select(
             article for article in models.Article
             if article.date.year == year
             and article.board.name == board_name
         )
         comment_or_post['發文且留言'] = orm.count(
             article.user
-            for article in total_articles
+            for article in year_articles
             if article.user.comments.select(
                 lambda c: c.date.year == year
             )
@@ -413,7 +413,10 @@ def get_users_specific_year_info(
 
 
 @orm.db_session
-def get_specific_year_info(board_name, **kargs):
+def get_top_n_total_articles_specific_year_info(
+    board_name,
+    year,
+):
 
     board_entity = models.Board.get(name=board_name)
 
@@ -421,210 +424,202 @@ def get_specific_year_info(board_name, **kargs):
         raise exceptions.NoBoardError(board_name)
 
     board_year_record_entity = models.BoardYearRecord.get(
-        year=kargs['year'],
-        board=board_entity.id
+        year=year,
+        board=board_entity
     )
 
-    if (
+    if not (
         board_year_record_entity
         and board_year_record_entity.update_time > board_entity.update_time
+        and board_year_record_entity.top_n_total_articles
+        and board_year_record_entity.top_n_total_push_comments_gained
+        and board_year_record_entity.top_n_total_boo_comments_gained
+        and board_year_record_entity.top_n_total_push_comments_used
+        and board_year_record_entity.top_n_total_boo_comments_used
     ):
-        board = {
-            'name': board_entity.name,
-            'year': kargs['year'],
-            'update_time': board_entity.update_time,
-        }
-        articles = {
-            'total': board_year_record_entity.articles_total,
-            'months': eval(board_year_record_entity.articles_months),
-            'total_users': board_year_record_entity.articles_total_users,
-        }
-        comments = {
-            'total': board_year_record_entity.comments_total,
-            'tags': eval(board_year_record_entity.comments_tags),
-            'total_users': board_year_record_entity.comments_total_users,
-        }
-        users = {
-            'total': board_year_record_entity.users_total,
-            'comment_or_post':
-                eval(board_year_record_entity.users_comment_or_post),
-        }
-        top_n = {
-            'total_articles': eval(
-                board_year_record_entity.top_n_total_articles
-            ),
-            'total_push_comments_gained': eval(
-                board_year_record_entity.top_n_total_push_comments_gained
-            ),
-            'total_boo_comments_gained': eval(
-                board_year_record_entity.top_n_total_boo_comments_gained
-            ),
-            'total_push_comments_used': eval(
-                board_year_record_entity.top_n_total_push_comments_used
-            ),
-            'total_boo_comments_used': eval(
-                board_year_record_entity.top_n_total_boo_comments_used
-            ),
-        }
-    else:
         update_time = datetime.datetime.now()
 
-        # Board
-        board = {}
-        board['name'] = board_entity.name
-        board['year'] = kargs['year']
-        board['update_time'] = board_entity.update_time
+        if board_year_record_entity is None:
+            board_year_record_entity = models.BoardYearRecord(
+                year=year,
+                board=board_entity,
+                update_time=update_time,
+            )
 
-        # Articles
-        total_articles = orm.select(
+        total_articles = defaultdict(int)
+        total_push_comments_gained = defaultdict(int)
+        total_boo_comments_gained = defaultdict(int)
+
+        year_articles = orm.select(
             article for article in models.Article
-            if article.date.year == kargs['year']
+            if article.date.year == year
             and article.board.name == board_name
         )
-        articles = {}
-        articles['total'] = total_articles.count()
-
-        articles['months'] = {
-            month: orm.count(
-                article
-                for article in total_articles
-                if article.date.month == month)
-            for month in range(1, 13)
-        }
-
-        articles['total_users'] = orm.count(article.user
-                                            for article in total_articles)
-
-        # Comments
-        total_comments = orm.select(
-            comment
-            for comment in models.Comment
-            if comment.date.year == kargs['year']
-            and comment.article.board.name == board_name
-        )
-        comments = {}
-        tag_names = orm.select(tag.name for tag in models.CommentTag)
-        comments['total'] = total_comments.count()
-        comments['tags'] = {
-            tag_name: orm.count(
-                comment
-                for comment in total_comments
-                if comment.tag.name == tag_name
-            )
-            for tag_name in tag_names
-        }
-
-        comments['total_users'] = orm.count(comment.user
-                                            for comment in total_comments)
-
-        # Users
-        users = {}
-        users['comment_or_post'] = {}
-        users['comment_or_post']['發文且留言'] = orm.count(
-            article.user
-            for article in total_articles
-            if article.user.comments.select(
-                lambda c: c.date.year == kargs['year']
-            )
-        )
-        users['comment_or_post']['只留言'] = (
-            comments['total_users'] - users['comment_or_post']['發文且留言']
-        )
-        users['comment_or_post']['只發文'] = (
-            articles['total_users'] - users['comment_or_post']['發文且留言']
-        )
-
-        users['total'] = {}
-        users['total'] = (
-            articles['total_users'] + comments['total_users']
-            - users['comment_or_post']['發文且留言']
-        )
-
-        # Top N
-        top_n = {}
-        top_n['total_articles'] = defaultdict(int)
-        top_n['total_push_comments_gained'] = defaultdict(int)
-        top_n['total_boo_comments_gained'] = defaultdict(int)
-        for article in total_articles:
+        for article in year_articles:
             author = article.user.identifier
-            top_n['total_articles'][author] += 1
+            total_articles[author] += 1
 
             for comment in article.comments:
                 if comment.tag.name == '推':
-                    top_n['total_push_comments_gained'][author] += 1
+                    total_push_comments_gained[author] += 1
                 if comment.tag.name == '噓':
-                    top_n['total_boo_comments_gained'][author] += 1
+                    total_boo_comments_gained[author] += 1
 
-        top_n['total_push_comments_used'] = defaultdict(int)
-        top_n['total_boo_comments_used'] = defaultdict(int)
-        for comment in total_comments:
+        total_push_comments_used = defaultdict(int)
+        total_boo_comments_used = defaultdict(int)
+        year_comments = orm.select(
+            comment
+            for comment in models.Comment
+            if comment.date.year == year
+            and comment.article.board.name == board_name
+        )
+        for comment in year_comments:
             if comment.tag.name == '推':
-                top_n['total_push_comments_used'][comment.user.identifier] += 1
+                total_push_comments_used[comment.user.identifier] += 1
             if comment.tag.name == '噓':
-                top_n['total_boo_comments_used'][comment.user.identifier] += 1
+                total_boo_comments_used[comment.user.identifier] += 1
 
-        if board_year_record_entity:
-            board_year_record_entity.set(
-                update_time=update_time,
-                articles_total=articles['total'],
-                articles_months=repr(articles['months']),
-                articles_total_users=articles['total_users'],
-                comments_total=comments['total'],
-                comments_tags=repr(comments['tags']),
-                comments_total_users=comments['total_users'],
-                users_total=users['total'],
-                users_comment_or_post=repr(users['comment_or_post']),
-                top_n_total_articles=repr(
-                    top_n['total_articles']
-                ).replace("<class 'int'>", "int"),
-                top_n_total_push_comments_gained=repr(
-                    top_n['total_push_comments_gained']
-                ).replace("<class 'int'>", "int"),
-                top_n_total_boo_comments_gained=repr(
-                    top_n['total_boo_comments_gained']
-                ).replace("<class 'int'>", "int"),
-                top_n_total_push_comments_used=repr(
-                    top_n['total_push_comments_used']
-                ).replace("<class 'int'>", "int"),
-                top_n_total_boo_comments_used=repr(
-                    top_n['total_boo_comments_used']
-                ).replace("<class 'int'>", "int"),
-            )
-        else:
+        board_year_record_entity.set(
+            top_n_total_articles=repr(
+                total_articles
+            ).replace("<class 'int'>", "int"),
+            top_n_total_push_comments_gained=repr(
+                total_push_comments_gained
+            ).replace("<class 'int'>", "int"),
+            top_n_total_boo_comments_gained=repr(
+                total_boo_comments_gained
+            ).replace("<class 'int'>", "int"),
+            top_n_total_push_comments_used=repr(
+                total_push_comments_used
+            ).replace("<class 'int'>", "int"),
+            top_n_total_boo_comments_used=repr(
+                total_boo_comments_used
+            ).replace("<class 'int'>", "int"),
+        )
+    orm.show(board_year_record_entity)
+
+    top_n = {
+        'total_articles': eval(
+            board_year_record_entity.top_n_total_articles
+        ),
+        'total_push_comments_gained': eval(
+            board_year_record_entity.top_n_total_push_comments_gained
+        ),
+        'total_boo_comments_gained': eval(
+            board_year_record_entity.top_n_total_boo_comments_gained
+        ),
+        'total_push_comments_used': eval(
+            board_year_record_entity.top_n_total_push_comments_used
+        ),
+        'total_boo_comments_used': eval(
+            board_year_record_entity.top_n_total_boo_comments_used
+        ),
+    }
+
+    return top_n
+
+
+@orm.db_session
+def get_top_n_specific_year_info(
+    board_name,
+    year,
+):
+
+    board_entity = models.Board.get(name=board_name)
+
+    if board_entity is None:
+        raise exceptions.NoBoardError(board_name)
+
+    board_year_record_entity = models.BoardYearRecord.get(
+        year=year,
+        board=board_entity
+    )
+
+    if not (
+        board_year_record_entity
+        and board_year_record_entity.update_time > board_entity.update_time
+        and board_year_record_entity.top_n_total_articles
+        and board_year_record_entity.top_n_total_push_comments_gained
+        and board_year_record_entity.top_n_total_boo_comments_gained
+        and board_year_record_entity.top_n_total_push_comments_used
+        and board_year_record_entity.top_n_total_boo_comments_used
+    ):
+        update_time = datetime.datetime.now()
+
+        if board_year_record_entity is None:
             board_year_record_entity = models.BoardYearRecord(
-                year=kargs['year'],
-                board=board_entity.id,
+                year=year,
+                board=board_entity,
                 update_time=update_time,
-                articles_total=articles['total'],
-                articles_months=repr(articles['months']),
-                articles_total_users=articles['total_users'],
-                comments_total=comments['total'],
-                comments_tags=repr(comments['tags']),
-                comments_total_users=comments['total_users'],
-                users_total=users['total'],
-                users_comment_or_post=repr(users['comment_or_post']),
-                top_n_total_articles=repr(
-                    top_n['total_articles']
-                ).replace("<class 'int'>", "int"),
-                top_n_total_push_comments_gained=repr(
-                    top_n['total_push_comments_gained']
-                ).replace("<class 'int'>", "int"),
-                top_n_total_boo_comments_gained=repr(
-                    top_n['total_boo_comments_gained']
-                ).replace("<class 'int'>", "int"),
-                top_n_total_push_comments_used=repr(
-                    top_n['total_push_comments_used']
-                ).replace("<class 'int'>", "int"),
-                top_n_total_boo_comments_used=repr(
-                    top_n['total_boo_comments_used']
-                ).replace("<class 'int'>", "int"),
             )
 
-        orm.show(board_year_record_entity)
+        total_articles = defaultdict(int)
+        total_push_comments_gained = defaultdict(int)
+        total_boo_comments_gained = defaultdict(int)
 
-    data = {}
-    sub_dicts = ('board', 'articles', 'comments', 'users', 'top_n')
-    for sub_dict in sub_dicts:
-        data[sub_dict] = eval(sub_dict)
+        year_articles = orm.select(
+            article for article in models.Article
+            if article.date.year == year
+            and article.board.name == board_name
+        )
+        for article in year_articles:
+            author = article.user.identifier
+            total_articles[author] += 1
 
-    return data
+            for comment in article.comments:
+                if comment.tag.name == '推':
+                    total_push_comments_gained[author] += 1
+                if comment.tag.name == '噓':
+                    total_boo_comments_gained[author] += 1
+
+        total_push_comments_used = defaultdict(int)
+        total_boo_comments_used = defaultdict(int)
+        year_comments = orm.select(
+            comment
+            for comment in models.Comment
+            if comment.date.year == year
+            and comment.article.board.name == board_name
+        )
+        for comment in year_comments:
+            if comment.tag.name == '推':
+                total_push_comments_used[comment.user.identifier] += 1
+            if comment.tag.name == '噓':
+                total_boo_comments_used[comment.user.identifier] += 1
+
+        board_year_record_entity.set(
+            top_n_total_articles=repr(
+                total_articles
+            ).replace("<class 'int'>", "int"),
+            top_n_total_push_comments_gained=repr(
+                total_push_comments_gained
+            ).replace("<class 'int'>", "int"),
+            top_n_total_boo_comments_gained=repr(
+                total_boo_comments_gained
+            ).replace("<class 'int'>", "int"),
+            top_n_total_push_comments_used=repr(
+                total_push_comments_used
+            ).replace("<class 'int'>", "int"),
+            top_n_total_boo_comments_used=repr(
+                total_boo_comments_used
+            ).replace("<class 'int'>", "int"),
+        )
+
+    top_n = {
+        'total_articles': eval(
+            board_year_record_entity.top_n_total_articles
+        ),
+        'total_push_comments_gained': eval(
+            board_year_record_entity.top_n_total_push_comments_gained
+        ),
+        'total_boo_comments_gained': eval(
+            board_year_record_entity.top_n_total_boo_comments_gained
+        ),
+        'total_push_comments_used': eval(
+            board_year_record_entity.top_n_total_push_comments_used
+        ),
+        'total_boo_comments_used': eval(
+            board_year_record_entity.top_n_total_boo_comments_used
+        ),
+    }
+
+    return top_n
