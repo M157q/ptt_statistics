@@ -507,8 +507,11 @@ def show_top_n_specific_year_info(
     year_total_comments,
     n=100,
 ):
-    total_articles, total_push_comments_gained, total_boo_comments_gained = \
-        controllers.get_top_n_total_articles_and_comments_gained_specific_year_info(
+    (total_articles_posted,
+     total_push_comments_gained,
+     total_boo_comments_gained) = \
+        controllers.\
+        get_top_n_total_articles_and_comments_gained_specific_year_info(
             board_name,
             year,
         )
@@ -520,7 +523,7 @@ def show_top_n_specific_year_info(
 
     total_articles_threshold = show_top_n_total_articles(
         n,
-        total_articles,
+        total_articles_posted,
         year_total_articles,
     )
     total_articles_threshold -= 5
@@ -535,7 +538,7 @@ def show_top_n_specific_year_info(
     show_top_n_average_push_comments_gained(
         n,
         total_push_comments_gained,
-        total_articles,
+        total_articles_posted,
         total_articles_threshold-5,
     )
     show_top_n_total_boo_comments_gained(
@@ -546,7 +549,7 @@ def show_top_n_specific_year_info(
     show_top_n_average_boo_comments_gained(
         n,
         total_boo_comments_gained,
-        total_articles,
+        total_articles_posted,
         total_articles_threshold-5,
     )
     show_top_n_total_push_comments_used(
