@@ -353,12 +353,16 @@ def show_top_n_data_template(
         print("")
 
 
-def show_top_n_total_articles(n, total_articles, year_total_articles):
+def show_top_n_total_articles_posted(
+    n,
+    total_articles_posted,
+    year_total_articles
+):
     total_articles_posted_threshold = show_top_n_data_template(
         show_type='total',
         title="最多發文數",
         n=n,
-        data_dict=total_articles,
+        data_dict=total_articles_posted,
         header_of_value='發文數',
         count_word_of_value='篇',
         denominator_of_percentage=year_total_articles,
@@ -439,7 +443,7 @@ def show_top_n_total_boo_comments_used(
 def show_top_n_average_push_comments_gained(
     n,
     total_push_comments_gained,
-    total_articles,
+    total_articles_posted,
     total_articles_posted_threshold,
 ):
     show_top_n_data_template(
@@ -450,12 +454,12 @@ def show_top_n_average_push_comments_gained(
             user: (
                 round((
                     total_push_comments_gained[user]
-                    / total_articles[user]),
+                    / total_articles_posted[user]),
                     2
                 )
             )
             for user, user_articles
-            in total_articles.items()
+            in total_articles_posted.items()
             if user_articles >= total_articles_posted_threshold
         },
         header_of_value='推文比',
@@ -463,7 +467,7 @@ def show_top_n_average_push_comments_gained(
         header_of_numerator='被推文數（則）',
         header_of_denominator='總發文數（篇）',
         numerator_dict=total_push_comments_gained,
-        denominator_dict=total_articles,
+        denominator_dict=total_articles_posted,
         denominator_threshold=total_articles_posted_threshold,
     )
 
@@ -471,7 +475,7 @@ def show_top_n_average_push_comments_gained(
 def show_top_n_average_boo_comments_gained(
     n,
     total_boo_comments_gained,
-    total_articles,
+    total_articles_posted,
     total_articles_posted_threshold,
 ):
     show_top_n_data_template(
@@ -482,12 +486,12 @@ def show_top_n_average_boo_comments_gained(
             user: (
                 round((
                     total_boo_comments_gained[user]
-                    / total_articles[user]),
+                    / total_articles_posted[user]),
                     2
                 )
             )
             for user, user_articles
-            in total_articles.items()
+            in total_articles_posted.items()
             if user_articles >= total_articles_posted_threshold
         },
         header_of_value='噓文比',
@@ -495,7 +499,7 @@ def show_top_n_average_boo_comments_gained(
         header_of_numerator='被噓文數（則）',
         header_of_denominator='總發文數（篇）',
         numerator_dict=total_boo_comments_gained,
-        denominator_dict=total_articles,
+        denominator_dict=total_articles_posted,
         denominator_threshold=total_articles_posted_threshold,
     )
 
@@ -511,7 +515,7 @@ def show_top_n_specific_year_info(
      total_push_comments_gained,
      total_boo_comments_gained) = \
         controllers.\
-        get_top_n_total_articles_and_comments_gained_specific_year_info(
+        get_top_n_total_articles_posted_and_comments_gained_specific_year_info(
             board_name,
             year,
         )
@@ -521,7 +525,7 @@ def show_top_n_specific_year_info(
             year,
         )
 
-    total_articles_posted_threshold = show_top_n_total_articles(
+    total_articles_posted_threshold = show_top_n_total_articles_posted(
         n,
         total_articles_posted,
         year_total_articles,

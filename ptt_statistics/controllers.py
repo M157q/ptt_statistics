@@ -430,7 +430,7 @@ def get_users_specific_year_info(
 
 
 @orm.db_session
-def get_top_n_total_articles_and_comments_gained_specific_year_info(
+def get_top_n_total_articles_posted_and_comments_gained_specific_year_info(
     board_name,
     year,
 ):
