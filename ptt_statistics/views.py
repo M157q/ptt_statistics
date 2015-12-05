@@ -354,7 +354,7 @@ def show_top_n_data_template(
 
 
 def show_top_n_total_articles(n, total_articles, year_total_articles):
-    total_articles_threshold = show_top_n_data_template(
+    total_articles_posted_threshold = show_top_n_data_template(
         show_type='total',
         title="最多發文數",
         n=n,
@@ -365,7 +365,7 @@ def show_top_n_total_articles(n, total_articles, year_total_articles):
         name_of_denominator_of_percentage='總文章數'
     )
 
-    return total_articles_threshold
+    return total_articles_posted_threshold
 
 
 def show_top_n_total_push_comments_gained(
@@ -440,7 +440,7 @@ def show_top_n_average_push_comments_gained(
     n,
     total_push_comments_gained,
     total_articles,
-    total_articles_threshold,
+    total_articles_posted_threshold,
 ):
     show_top_n_data_template(
         show_type='average',
@@ -456,7 +456,7 @@ def show_top_n_average_push_comments_gained(
             )
             for user, user_articles
             in total_articles.items()
-            if user_articles >= total_articles_threshold
+            if user_articles >= total_articles_posted_threshold
         },
         header_of_value='推文比',
         count_word_of_value='則／篇',
@@ -464,7 +464,7 @@ def show_top_n_average_push_comments_gained(
         header_of_denominator='總發文數（篇）',
         numerator_dict=total_push_comments_gained,
         denominator_dict=total_articles,
-        denominator_threshold=total_articles_threshold,
+        denominator_threshold=total_articles_posted_threshold,
     )
 
 
@@ -472,7 +472,7 @@ def show_top_n_average_boo_comments_gained(
     n,
     total_boo_comments_gained,
     total_articles,
-    total_articles_threshold,
+    total_articles_posted_threshold,
 ):
     show_top_n_data_template(
         show_type='average',
@@ -488,7 +488,7 @@ def show_top_n_average_boo_comments_gained(
             )
             for user, user_articles
             in total_articles.items()
-            if user_articles >= total_articles_threshold
+            if user_articles >= total_articles_posted_threshold
         },
         header_of_value='噓文比',
         count_word_of_value='則／篇',
@@ -496,7 +496,7 @@ def show_top_n_average_boo_comments_gained(
         header_of_denominator='總發文數（篇）',
         numerator_dict=total_boo_comments_gained,
         denominator_dict=total_articles,
-        denominator_threshold=total_articles_threshold,
+        denominator_threshold=total_articles_posted_threshold,
     )
 
 
@@ -521,14 +521,14 @@ def show_top_n_specific_year_info(
             year,
         )
 
-    total_articles_threshold = show_top_n_total_articles(
+    total_articles_posted_threshold = show_top_n_total_articles(
         n,
         total_articles_posted,
         year_total_articles,
     )
-    total_articles_threshold -= 5
-    if total_articles_threshold < 0:
-        total_articles_threshold = 0
+    total_articles_posted_threshold -= 5
+    if total_articles_posted_threshold < 0:
+        total_articles_posted_threshold = 1
 
     show_top_n_total_push_comments_gained(
         n,
@@ -539,7 +539,7 @@ def show_top_n_specific_year_info(
         n,
         total_push_comments_gained,
         total_articles_posted,
-        total_articles_threshold-5,
+        total_articles_posted_threshold,
     )
     show_top_n_total_boo_comments_gained(
         n,
@@ -550,7 +550,7 @@ def show_top_n_specific_year_info(
         n,
         total_boo_comments_gained,
         total_articles_posted,
-        total_articles_threshold-5,
+        total_articles_posted_threshold,
     )
     show_top_n_total_push_comments_used(
         n,
