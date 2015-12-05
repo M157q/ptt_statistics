@@ -1,6 +1,7 @@
 import datetime
 import re
 from collections import defaultdict
+from collections import Counter
 from pprint import pprint
 
 from pony import orm
@@ -312,14 +313,14 @@ def get_comments_specific_year_info(board_name, year):
                 update_time=update_time,
             )
 
-        tags = defaultdict(int)
-        for tag_name in orm.select(
-            comment.tag.name
-            for comment in models.Comment
-            if comment.date.year == year
-            and comment.article.board.name == board_name
-        ).without_distinct():
-            tags[tag_name] += 1
+        tags = Counter(
+            orm.select(
+                comment.tag.name
+                for comment in models.Comment
+                if comment.date.year == year
+                and comment.article.board.name == board_name
+            ).without_distinct()
+        )
 
         total_users = orm.select(
             comment.user
@@ -337,7 +338,7 @@ def get_comments_specific_year_info(board_name, year):
 
         board_year_record_entity.set(
             comments_total=total,
-            comments_tags=repr(tags).replace("<class 'int'>", "int"),
+            comments_tags=repr(tags),
             comments_total_users=total_users,
             update_time=update_time,
         )
@@ -460,17 +461,17 @@ def get_top_n_total_articles_and_comments_gained_specific_year_info(
                 update_time=update_time,
             )
 
-        total_articles = defaultdict(int)
-        for author in orm.select(
-            article.user.identifier
-            for article in models.Article
-            if article.date.year == year
-            and article.board.name == board_name
-        ).without_distinct():
-            total_articles[author] += 1
+        total_articles_posted = Counter(
+            orm.select(
+                article.user.identifier
+                for article in models.Article
+                if article.date.year == year
+                and article.board.name == board_name
+            ).without_distinct()
+        )
+
         total_push_comments_gained = defaultdict(int)
         total_boo_comments_gained = defaultdict(int)
-
         for author, comment_tag_name in orm.select(
             (comment.article.user.identifier, comment.tag.name)
             for comment in models.Comment
@@ -483,9 +484,7 @@ def get_top_n_total_articles_and_comments_gained_specific_year_info(
                 total_boo_comments_gained[author] += 1
 
         board_year_record_entity.set(
-            top_n_total_articles_posted=repr(
-                total_articles
-            ).replace("<class 'int'>", "int"),
+            top_n_total_articles_posted=repr(total_articles_posted),
             top_n_total_push_comments_gained=repr(
                 total_push_comments_gained
             ).replace("<class 'int'>", "int"),
