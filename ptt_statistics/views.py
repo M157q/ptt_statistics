@@ -53,11 +53,16 @@ def show_articles_specific_year_info(board_name, year):
     ))
     for month in sorted(articles['months']):
         n_of_month_articles = articles['months'][month]
+        try:
+            percentage = n_of_month_articles/articles['total']
+        except ZeroDivisionError:
+            percentage = 0
+
         print("| {0:>2} 月 | {1:>{2},} 篇 | ({3:6.2%}) |".format(
             month,
             n_of_month_articles,
             len_of_n_of_month_articles,
-            n_of_month_articles/articles['total']))
+            percentage))
     print("")
 
     print("")
@@ -163,12 +168,17 @@ def show_users_specific_year_info(
         key=lambda x: x[1],
         reverse=True
     ):
+        try:
+            percentage = n_of_user_type/users['total']
+        except ZeroDivisionError:
+            percentage = 0
+
         print("| {0:{fill}<{1}} | {2:>{3},} 位 | ({4:6.2%}) |".format(
             user_type,
             format_len_of_user_type,
             n_of_user_type,
             format_len_of_n_of_user_type,
-            n_of_user_type/users['total'],
+            percentage,
             fill='　'))  # Use fullwidth space for Chinese character
     print("")
 
@@ -267,17 +277,26 @@ def show_top_n_data_template(
             ))
 
         sum_of_top_n_data_values = sum(t.value for t in top_n_data)
+
+        try:
+            percentage = sum_of_top_n_data_values/denominator_of_percentage
+        except ZeroDivisionError:
+            percentage = 0
+
         print("")
         print("共 {0:>{1},} {2}，佔年度{3} {4:6.2%}".format(
             sum_of_top_n_data_values,
             utils.get_format_len_of_num(sum_of_top_n_data_values),
             count_word_of_value,
             name_of_denominator_of_percentage,
-            sum_of_top_n_data_values/denominator_of_percentage
+            percentage,
         ))
         print("")
 
-        return top_n_data[-1].value
+        try:
+            return top_n_data[-1].value
+        except IndexError:
+            return 0
 
     if show_type == 'average':
         format_len_of_numerator = utils.get_format_len_of_container(

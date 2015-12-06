@@ -233,9 +233,9 @@ def get_articles_specific_year_info(board_name, year):
     if not (
         board_year_record_entity
         and board_year_record_entity.update_time > board_entity.update_time
-        and board_year_record_entity.articles_total
-        and board_year_record_entity.articles_months
-        and board_year_record_entity.articles_total_users
+        and board_year_record_entity.articles_total is not None
+        and board_year_record_entity.articles_months is not None
+        and board_year_record_entity.articles_total_users is not None
     ):
         update_time = datetime.datetime.now()
 
@@ -302,9 +302,9 @@ def get_comments_specific_year_info(board_name, year):
     if not (
         board_year_record_entity
         and board_year_record_entity.update_time > board_entity.update_time
-        and board_year_record_entity.comments_total
-        and board_year_record_entity.comments_tags
-        and board_year_record_entity.comments_total_users
+        and board_year_record_entity.comments_total is not None
+        and board_year_record_entity.comments_tags is not None
+        and board_year_record_entity.comments_total_users is not None
     ):
         update_time = datetime.datetime.now()
 
@@ -375,8 +375,8 @@ def get_users_specific_year_info(
     if not (
         board_year_record_entity
         and board_year_record_entity.update_time > board_entity.update_time
-        and board_year_record_entity.users_total
-        and board_year_record_entity.users_comment_or_post
+        and board_year_record_entity.users_total is not None
+        and board_year_record_entity.users_comment_or_post is not None
     ):
         update_time = datetime.datetime.now()
 
@@ -450,9 +450,13 @@ def get_top_n_total_articles_posted_and_comments_gained_specific_year_info(
     if not (
         board_year_record_entity
         and board_year_record_entity.update_time > board_entity.update_time
-        and board_year_record_entity.top_n_total_articles_posted
-        and board_year_record_entity.top_n_total_push_comments_gained
-        and board_year_record_entity.top_n_total_boo_comments_gained
+        and all(map(
+            lambda x: x is not None, (
+                board_year_record_entity.top_n_total_articles_posted,
+                board_year_record_entity.top_n_total_push_comments_gained,
+                board_year_record_entity.top_n_total_boo_comments_gained,
+            )
+        ))
     ):
         update_time = datetime.datetime.now()
 
@@ -531,8 +535,8 @@ def get_top_n_total_comments_used_specific_year_info(
     if not (
         board_year_record_entity
         and board_year_record_entity.update_time > board_entity.update_time
-        and board_year_record_entity.top_n_total_push_comments_used
-        and board_year_record_entity.top_n_total_boo_comments_used
+        and board_year_record_entity.top_n_total_push_comments_used is not None
+        and board_year_record_entity.top_n_total_boo_comments_used is not None
     ):
         update_time = datetime.datetime.now()
 
