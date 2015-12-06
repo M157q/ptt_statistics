@@ -3,11 +3,11 @@ from . import controllers
 
 
 def show_specific_day_info(data):
-    pass
+    raise NotImplementedError
 
 
 def show_specific_month_info(data):
-    pass
+    raise NotImplementedError
 
 
 def show_board_specific_year_info(board_name, year):

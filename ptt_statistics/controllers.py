@@ -180,12 +180,12 @@ def store_comment(comment, article, board):
 
 @orm.db_session
 def get_specific_day_info(board_name, **kargs):
-    pass
+    raise NotImplementedError
 
 
 @orm.db_session
 def get_specific_month_info(board_name, **kargs):
-    pass
+    raise NotImplementedError
 
 
 @orm.db_session
