@@ -114,8 +114,8 @@ def store_article_info(article_path):
 def show_board_info(board_name, date_tuple):
     try:
         year, month, day = utils.check_date_tuple(date_tuple)
-    except ValueError:
-        traceback.print_exc()
+    except ValueError as e:
+        print(e)
         exit()
 
     if year and month and day:
@@ -179,9 +179,13 @@ def main():
     if hasattr(args, 'article_path'):
         store_article_info(args.article_path)
     if hasattr(args, 'board_to_show') and hasattr(args, 'date'):
-        date_list = list(map(int, filter(bool, args.date.split('.'))))
-        date_list += [None]*(3-len(date_list))
-        show_board_info(args.board_to_show, tuple(date_list))
+        try:
+            date_list = list(map(int, filter(bool, args.date.split('.'))))
+        except ValueError:
+            print("Use this format for date: YYYY or YYYY.MM or YYYY.MM.DD")
+        else:
+            date_list += [None]*(3-len(date_list))
+            show_board_info(args.board_to_show, tuple(date_list))
 
 
 if __name__ == "__main__":
