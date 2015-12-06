@@ -260,6 +260,8 @@ def get_articles_specific_year_info(board_name, year):
             and article.board.name == board_name
         ).without_distinct():
             months[month] += 1
+        for month in range(1, 13):
+            months[month] += 0
 
         total_users = orm.select(
             article.user
