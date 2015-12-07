@@ -16,44 +16,68 @@ from . import views
 
 def get_args():
     p = argparse.ArgumentParser(prog='ptt-statistics')
-    sub_p = p.add_subparsers(title='subcommands',
-                             help="use ${sub-command} -h for further usage")
+    sub_p = p.add_subparsers(
+        title='subcommands',
+        help="use ${sub-command} -h for further usage",
+    )
 
     # subcommand: crawl
-    p_board = sub_p.add_parser('crawl',
-                               help="Crawl the specific board")
-    p_board.add_argument('board_name',
-                         type=str,
-                         help="The name of the board")
-    p_board.add_argument('--from-year',
-                         nargs='?',
-                         type=int,
-                         default=datetime.MINYEAR,
-                         help="default: {}".format(datetime.MINYEAR))
-    p_board.add_argument('--to-year',
-                         nargs='?',
-                         type=int,
-                         default=datetime.date.today().year,
-                         help="default: {}".format(datetime.date.today().year))
+    p_crawl = sub_p.add_parser(
+        'crawl',
+        help="Crawl the specific board",
+    )
+    p_crawl.add_argument(
+        'board_name',
+        type=str,
+        help="The name of the board",
+    )
+    p_crawl.add_argument(
+        '--from-year',
+        nargs='?',
+        type=int,
+        default=datetime.MINYEAR,
+        help="default: {}".format(datetime.MINYEAR),
+    )
+    p_crawl.add_argument(
+        '--to-year',
+        nargs='?',
+        type=int,
+        default=datetime.date.today().year,
+        help="default: {}".format(datetime.date.today().year),
+    )
 
     # subcommand: get_article
-    p_path = sub_p.add_parser('get_article',
-                              help="Get specific article info with path")
-    p_path.add_argument('article_path',
-                        type=str,
-                        help=("The path of the article on www.ptt.cc"
-                              "In this format: '/bbs/${board}/${id}.html' "))
+    p_get_article = sub_p.add_parser(
+        'get_article',
+        help="Get specific article info with path",
+    )
+    p_get_article.add_argument(
+        'article_path',
+        type=str,
+        help=(
+            "The path of the article on www.ptt.cc "
+            "in this format: '/bbs/${board}/${id}.html'"
+        ),
+    )
 
     # subcommand: show
-    p_show = sub_p.add_parser('show',
-                              help="Show info of the board via data in db")
-    p_show.add_argument('board_to_show',
-                        type=str,
-                        help="The name of the board to show")
-    p_show.add_argument('date',
-                        type=str,
-                        help=("Info about which year of the board to show "
-                              "format: YYYY or YYYY.MM or YYYY.MM.DD"))
+    p_show = sub_p.add_parser(
+        'show',
+        help="Show info of the board via data in db",
+    )
+    p_show.add_argument(
+        'board_to_show',
+        type=str,
+        help="The name of the board to show",
+    )
+    p_show.add_argument(
+        'date',
+        type=str,
+        help=(
+            "Info about which year of the board to show "
+            "format: YYYY or YYYY.MM or YYYY.MM.DD"
+        ),
+    )
 
     args = p.parse_args()
     return args
