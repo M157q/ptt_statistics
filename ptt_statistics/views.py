@@ -347,7 +347,7 @@ def show_top_n_data_template(
         ))
 
         datum = (
-            "| {0:>{1},} | {2:>{3}} | {4:>{5},} | {6:>{7},} |"
+            "| {0:>{1},} | {2:>{3}} | {4:>{5}.2f} | {6:>{7},} |"
             " {8:>{9},} |"
         )
         for t in top_n_data:
@@ -365,7 +365,7 @@ def show_top_n_data_template(
             ))
 
         print("")
-        print("僅計算{}到達 {} 以上的使用者".format(
+        print("僅計算{}達到 {} 以上的使用者".format(
             header_of_denominator,
             denominator_threshold,
         ))
