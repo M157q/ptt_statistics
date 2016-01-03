@@ -90,37 +90,42 @@ def store_board_info(board_name, from_year, to_year):
     try:
         article = articles.next()
     except:
+        print("No article in board '{}'.".format(board_name))
+        print("Make sure you've entered the correct name.")
         return
-    else:
-        controllers.store_board(board)
 
-        while True:
+    controllers.store_board(board)
+
+    while True:
+        if article:
             try:
                 article_year = article.time.date().year
             except:
                 pass
             else:
+                if article_year < from_year:
+                    print("Articles from {} to {} stored.".format(
+                        from_year, to_year
+                    ))
+                    break
+
                 if from_year <= article_year <= to_year:
                     controllers.store_article(article, board)
                     for comment in article.comments:
                         controllers.store_comment(comment, article, board)
-                elif article_year < from_year:
-                    break
-                else:
-                    pass
 
-            try:
-                article = articles.next()
-            except StopIteration:
-                print("No next article.")
-                break
-            except requests.exceptions.ConnectionError:
-                traceback.print_exc()
-                print("ConnectionError happened.")
-                break
-            except:
-                traceback.print_exc()
-                continue
+        try:
+            article = articles.next()
+        except StopIteration:
+            print("No next article.")
+            break
+        except requests.exceptions.ConnectionError:
+            traceback.print_exc()
+            print("ConnectionError happened.")
+            break
+        except:
+            traceback.print_exc()
+            article = None
 
 
 def store_article_info(article_path):
