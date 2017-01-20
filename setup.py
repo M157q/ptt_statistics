@@ -6,7 +6,7 @@ import ptt_statistics
 
 try:
     import ptt_crawler
-except ImportError:
+except ImportError, ModuleNotFoundError:
     errmsg = [
         "Cannot find module 'ptt_crawler'",
         "Use the following command to install",
